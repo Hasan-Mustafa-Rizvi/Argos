@@ -50,8 +50,10 @@ and what must stay true.
 
 | Question | Status |
 |---|---|
-| How does our code receive video and audio from a Chert FaceTime call, and show a live page on it? | Open. Needs their docs and their rep. |
-| Does Chert access last through Sunday afternoon? | Open. The public trial is 24 hours. |
+| How does our code reach a FaceTime call through Chert? | Answered from their docs, Sat 4:45 PM. Chert bridges a FaceTime line into a LiveKit room. Our agent joins that room, hears the person and speaks. See the tracker log. |
+| Can our line place outbound calls, carry video out, and show our own picture to the person called? | Open. Each is switched on per line by Chert. Ask at their table. The hackathon starter covers inbound audio only. |
+| Which machine runs the Chert connector? | Open. It needs macOS or Linux with Node 22 or 24. The brain's laptop is Windows. |
+| Does Chert access last through Sunday afternoon? | Open. Lines are handed out by the organizers, one call at a time per line, possibly in time slots. Confirm our line and our slot for judging. |
 | Email provider | Open. Decided at the escalation milestone. |
 | What the body has: servos, camera, speaker | Open. Waiting on the components list in `progress.md`. |
 | Demo sessions are open to anyone with the link during the event | Accepted. A demo session plays the scripted run only and never receives live records or the live view. |

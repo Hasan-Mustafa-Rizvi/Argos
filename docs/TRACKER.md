@@ -1,7 +1,7 @@
 # Argos software tracker
 
-**Last updated:** Sat Nov 14 2026, 4:05 PM CT
-**Status:** W1 and W2 go to the coding agent as one prompt. Supabase project exists; M3 can start.
+**Last updated:** Sat Nov 14 2026, 4:45 PM CT
+**Status:** Web A is building. M3 is applied. Brain A prompt is written. Chert is understood; three answers are needed from their table.
 
 Hasan owns all software. This file records where the software is. Coding agents never edit it.
 
@@ -58,7 +58,8 @@ General, Hardware, Chert (best use of FaceTime), ElevenLabs, MLH Gemini API, MLH
 | Supabase | M3 | Ready. Project "Argos". New tables are not exposed to the API unless granted. |
 | Gemini (Google AI Studio) | M5 | To create |
 | ElevenLabs | M5 | To create |
-| Chert | M6 | To create. Confirm access lasts through Sunday afternoon first. |
+| Chert | M6 | Get our assigned FaceTime line, time slot and dispatch name from the organizers or the Chert table. |
+| LiveKit Cloud | M6 | To create. Chert connects FaceTime to a LiveKit room that we own. |
 | Email sender | M6 | To choose |
 | Devpost | Sat midnight | To create |
 
@@ -74,6 +75,27 @@ General, Hardware, Chert (best use of FaceTime), ElevenLabs, MLH Gemini API, MLH
 - A manual override was mentioned by Hasan as a possible later addition. Not specified yet.
 
 ## Log
+
+### Sat Nov 14, 4:45 PM
+Read Chert's FaceTime docs. How it works: Chert owns the FaceTime line and bridges each call
+into a LiveKit room that we create. Our agent is a LiveKit agent in that room. It receives
+the person's audio (and their camera only if capture is switched on for the line) and
+publishes its own audio. A call is placed with one HTTP request once the room and a silent
+agent are ready, and the agent speaks only after the bridge reports ready. What this changes:
+the escalation is a second small program, the call agent, beside the brain; it needs a
+LiveKit Cloud project and a voice model account; and the Chert connector runs on macOS or
+Linux with Node, not on Windows. What is not settled: outbound calling, outbound video and
+showing our own picture are each enabled per line, and the hackathon starter is inbound
+audio only. Fallback if outbound is not available: Argos sends word by email and dashboard,
+and the contact FaceTimes Argos's line and talks to the agent.
+
+The MLH prize noted as "SpaceXSI" is DeepSpace, a full-stack SDK (sign-in, data, live sync,
+hosting) that an app is scaffolded on. Building with Cursor does not use it. Not adopted for
+the core. A separate small app is the only cheap way to enter; awaiting Hasan's call.
+
+Brain A prompt written: the core in stage 1 (state machine, records, serial, keyboard
+triggers, dry-run escalation), senses and voice in stage 2 (camera, listening, Gemini,
+ElevenLabs, snapshot, live view frames).
 
 ### Sat Nov 14, 4:25 PM
 M3 applied to the Supabase project "Argos" from `supabase/schema.sql`. Tested inside a
