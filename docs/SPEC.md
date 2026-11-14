@@ -6,18 +6,20 @@ and what must stay true.
 ## The parts
 
 ```
- Dog body (ESP32)          Laptop brain (Python)               Backend (Supabase)
- eyes, touch pad,   USB    camera + microphone        HTTPS    devices, incidents,
- buzzer, room       serial pose and speech detection ───────▶  events, readings,
- temperature  ◀──────────▶ state machine                       snapshot storage,
- head (optional)    JSON   voice out                           sign-in and access rules
-                    lines  Gemini check on one snapshot              │ live updates
-                           escalation: FaceTime call, email          ▼
-                                                               Dashboard (web/)
-                                                               family view, clinician view
+ Reachy Mini Lite            Raspberry Pi 5: the brain (Python)      Backend (Supabase)
+ head, antennas,     USB     state machine                   HTTPS   devices, incidents,
+ camera, microphones, ─────▶ fall, stillness and voice detection ──▶ events, readings,
+ speaker             ◀─────  spoken lines (ElevenLabs)               snapshot storage,
+                             Gemini check on one frame               sign-in and access rules
+ Optional sensor      USB    live view frames                            │ live updates
+ board (ESP32):      ──────▶ escalation                                  ▼
+ temperature, tilt,  serial                                          Dashboard (web/)
+ touch pad                   Call agent (MacBook): FaceTime          family view, clinician view
+                             through Chert and LiveKit
 ```
 
-- **The laptop is the brain.** The ESP32 only runs the body. No vision or speech runs on it.
+- **The Raspberry Pi is the brain.** The same program runs on a laptop for development and as
+  the fallback. The robot only moves, sees, hears and speaks.
 - **The brain owns the state machine** in section 1 of the contract. The body shows the
   state. The dashboard displays it. Neither decides it.
 - **The brain is the only writer** to the backend. The dashboard reads, and makes exactly
@@ -53,7 +55,8 @@ and what must stay true.
 | How does our code reach a FaceTime call through Chert? | Answered from their docs, Sat 4:45 PM. Chert bridges a FaceTime line into a LiveKit room. Our agent joins that room, hears the person and speaks. See the tracker log. |
 | Can our line place outbound calls, carry video out, and show our own picture to the person called? | Chert's challenge page says yes to all three for hackathon teams. To be proven on our own line. Calls go only to phones verified with the line. |
 | Which machine runs the Chert connector and the call agent? | A teammate's MacBook. Windows 11 is supported in beta. |
-| What is in the body now that it carries a Raspberry Pi 5? | Open. Is there still an ESP32, and what is wired to the Pi: camera, microphone, speaker, eyes, touch? The contract's serial link and the diagram above change once this is known. |
+| What is in the body? | Answered Sat 5:03 PM: a Reachy Mini Lite on the Pi, with its own camera, microphones, speaker and moving head. Contract v0.3. |
+| How does a person give Argos a pat? | Open. The robot has no touch pad. Options: a touch wire on the optional ESP32 board, or pressing an antenna if the robot's software can sense that. |
 | Does Chert access last through Sunday afternoon? | Yes if the trial starts after Sat 4 PM: it runs 48 hours. The limit that matters is 50 FaceTime minutes in total, 5 minutes a call. Ask Chert for more if testing eats them. |
 | Email provider | Open. Decided at the escalation milestone. |
 | What the body has: servos, camera, speaker | Open. Waiting on the components list in `progress.md`. |

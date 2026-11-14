@@ -1,6 +1,6 @@
 # Argos visual identity
 
-Version 0.2 · Sat Nov 14 2026
+Version 0.3 · Sat Nov 14 2026
 
 Argos looks like a cobalt engraving on cream paper: one ink, one paper, drawn lines, hatching
 and dither where other products use gradients and glass. It comes from four references, listed
@@ -39,7 +39,7 @@ different ink. One variable changes and every border, heading and button follows
 | `calm` | `#2238c4` | Cobalt | 13.9 : 1 | 7.9 : 1 |
 | `checking` | `#8a5a0b` | Ochre | 12.3 : 1 | 5.4 : 1 |
 | `alert` | `#7a1d2b` | Oxblood | 14.7 : 1 | 9.4 : 1 |
-| offline | `#46547e` at 60% | Faded cobalt | | |
+| offline | `#46547e` | Faded cobalt. Text is full strength; only the drawn parts (meander, mark, dither) fade to 60%, because faded text falls under 3 : 1. | | |
 
 A judge standing two metres away can read the state from the colour of the screen alone.
 Colour never carries the state by itself: the state word is always printed in large type too.
@@ -69,8 +69,9 @@ For other inks, build the ramp the same way: mix ink into paper at 0, 12, 28, 46
 | Text and UI | Atkinson Hyperlegible 400, 700 | Body, buttons, forms |
 | Data and labels | JetBrains Mono 500 | Times, readings, small capital labels |
 
-- Libre Baskerville is already in the landing template's font stack, so loading it makes the
-  landing identical on every device.
+- The landing template's own font stack starts with fonts that only Apple devices have, so
+  the site sets the template's serif and sans variables to these three. That makes the
+  landing identical on every device with no edit to the template.
 - Atkinson Hyperlegible was designed for low-vision readers. That suits a product a family
   member checks in a hurry.
 - Labels are mono, 11 px, uppercase, letter-spacing 0.12em, in `--soft`.

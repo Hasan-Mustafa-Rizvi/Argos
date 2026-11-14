@@ -1,7 +1,7 @@
 # Argos software tracker
 
-**Last updated:** Sat Nov 14 2026, 5:10 PM CT
-**Status:** Web A is building. M3 is applied. Brain A prompt is ready and now targets a Raspberry Pi 5. Track rules logged from Devpost and Discord.
+**Last updated:** Sat Nov 14 2026, 5:35 PM CT
+**Status:** Web A is reviewed and committed. Contract v0.3: the body is a Reachy Mini Lite. Brain A prompt is ready to run.
 
 Hasan owns all software. This file records where the software is. Coding agents never edit it.
 
@@ -10,14 +10,14 @@ Hasan owns all software. This file records where the software is. Coding agents 
 | # | Milestone | Lane | State | Waiting on |
 |---|---|---|---|---|
 | M0 | Repo layout, ignore rules, agent rules, docs | root | Done | |
-| M1 | Contract v0.2 and scripted demo run | `contract/` | Done | |
-| W1 | Web shell: tokens, landing, sign-in, logo reveal, empty dashboard frame | `web/` | Ready to start, one prompt with W2 | |
-| W2 | Dashboard on replay data | `web/` | Ready to start, one prompt with W1 | |
+| M1 | Contract v0.3 and scripted demo run | `contract/` | Done | |
+| W1 | Web shell: tokens, landing, sign-in, logo reveal, empty dashboard frame | `web/` | Done, reviewed, committed | |
+| W2 | Dashboard on replay data | `web/` | Done, reviewed, committed. Not yet deployed. | |
 | M3 | Schema, access rules, second factor, live updates, live view channel | `supabase/` | Applied and tested. Three dashboard switches and the first account are Hasan's. | |
 | W3 | Dashboard reads live data, real sign-in with second factor, live view, keeps replay mode | `web/` | Not started | W2, M3 |
-| M5 | Brain: simulator first, then real detection, voice and live view frames | `brain/` | Not started | M3 for writes |
+| M5 | Brain: core, robot body language, then detection, voice and live view frames | `brain/` | Prompt ready | |
 | M6 | Escalation: FaceTime call and email, dry-run by default | `brain/` | Not started | Chert answers |
-| M7 | Firmware | `firmware/` | Not started | Components list |
+| M7 | Firmware for the optional sensor board | `firmware/` | Not needed unless the team wants the touch pad or room temperature | |
 
 ## Decisions
 
@@ -40,6 +40,8 @@ Hasan owns all software. This file records where the software is. Coding agents 
 | Sat 3:50 PM | **The centre of the dashboard is the live view from the dog's camera** | Hasan's call. The dashboard is only for signed-in people, so the feed is protected by sign-in and a second factor. |
 | Sat 3:50 PM | The live view is never stored, needs a second factor, goes to family accounts only, and is off unless switched on | Keeps the stored-image rule intact and keeps the family and clinician split consistent: clinicians already do not see images. |
 | Sat 3:50 PM | Demo sessions play the scripted run and never get live records or the live view | The demo buttons are public. Nothing real should be one tap away from a stranger. |
+| Sat 5:03 PM | The body is a Reachy Mini Lite on the Pi: camera, microphones, speaker, moving head (team's call). The ESP32 becomes an optional sensor board. | The robot already has every sense the brain needs. Contract v0.3. |
+| Sat 5:35 PM | The reveal's brighter blue while the glass holds the mark stays as it is | It lasts about two seconds, is part of the glass effect, and settles to cobalt. Not worth another edit to a copied file. Hasan can overrule after seeing it. |
 | Sat 4:53 PM | The dog carries a Raspberry Pi 5 (team's call). The brain runs on it; the laptop is where it is developed and the fallback. | More power in the body, no tether, and the same code runs on both. |
 | Sat 4:53 PM | DeepSpace is left out. SpaceXSI, DEV post and a domain sit in a track check list for spare time. | Hasan's call. None of them may touch the core. |
 | Sat 4:05 PM | The web build is two prompts, not three: W1 and W2 in one run, then W3 | Neither W1 nor W2 needs a backend, and the coding agent has no usage limit. Review happens per stage inside one report. |
@@ -96,6 +98,27 @@ Not entering: FaZe Clan, Solana, Tiger Data, MongoDB Atlas, Vultr.
 - A manual override was mentioned by Hasan as a possible later addition. Not specified yet.
 
 ## Log
+
+### Sat Nov 14, 5:35 PM
+Reviewed Web A. Verified independently from a clean copy: 57 of 57 tests pass, the build
+succeeds, the linter reports 0 errors and 3 warnings (all inside the two copied files). Read
+the role filter (`web/src/data/admit.ts`): rows are rebuilt from known columns and what a
+role may not see is dropped before storage. Looked at the running site: landing, sign-in,
+the reveal, the dashboard calm and in alert. Scanned for contact details and keys: none.
+Committed as `5684b24`.
+
+Findings from the coding agent's report, and what was done:
+- Contract: `ended_at` on acknowledgement was set by nobody. Now the brain sets it (v0.3).
+- Contract: `last_seen_at` may be null (v0.3).
+- Contract: `room_alert` carried a temperature that family could read through the
+  timeline. Removed (v0.3).
+- Contract: a fixture's last line is never seen for long. Rule added (v0.3).
+- Identity: two wrong statements corrected (the landing's font stack; the offline ink).
+- Left for Web B: the landing still lists ESP32 under "Built with"; the press tiles draw
+  each teammate as a newspaper masthead; an empty paragraph where the copyright was.
+
+The body changed to a Reachy Mini Lite. Brain A now has three body drivers (none, the robot,
+the optional sensor board) and reads the camera and audio from the robot or the machine.
 
 ### Sat Nov 14, 5:10 PM
 Track rules logged from Devpost, Discord and Chert's challenge page. Corrections to earlier

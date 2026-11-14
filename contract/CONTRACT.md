@@ -1,6 +1,12 @@
 # Argos contract
 
-Version 0.2 · Sat Nov 14 2026
+Version 0.3 · Sat Nov 14 2026
+
+Changed in 0.3: the body is a Reachy Mini Lite driven by the brain on a Raspberry Pi 5, and
+the serial link in section 2 is now an optional sensor board. `last_seen_at` may be null.
+`ended_at` on an acknowledgement is set by the brain. `room_alert` no longer carries a
+temperature. A rule for the last line of a fixture. No record changed shape, and the
+fixtures are unchanged.
 
 Changed in 0.2: section 6, the live view, is new. Section 4 gains the live view row and the
 second factor. The privacy rule in section 3 now says plainly that it is about what is
@@ -55,7 +61,20 @@ The 10 second wait is a setting (`CHECK_TIMEOUT_S`), not a constant.
 
 ---
 
-## 2. Dog and laptop: the serial link
+## 2. The body
+
+The brain is a program on a Raspberry Pi 5. The body is a **Reachy Mini Lite** plugged into
+it: a head that moves, two antennas, a camera, microphones and a speaker. The brain drives
+it through the robot's own software, on the same machine. There is no message format to
+agree for that: the brain's body driver decides what each state looks like, such as where
+the head turns and what the antennas do.
+
+The brain must run with no body at all, and on a laptop.
+
+### The optional sensor board: the serial link
+
+A small board on a USB cable can add what the robot lacks: room temperature, tilt, and a
+touch pad for a pat. It is optional. Everything works without it.
 
 USB serial, 115200 baud, UTF-8. One JSON object per line, ending in `\n`. A line is at most
 256 bytes. Sample lines are in `examples/serial.jsonl`, where each sample is wrapped as
@@ -70,8 +89,8 @@ USB serial, 115200 baud, UTF-8. One JSON object per line, ending in `\n`. A line
 | `event` | `ms`, `kind` | When it happens |
 | `err` | `msg` | A command could not be carried out |
 
-`caps` lists what this body can do, from: `eyes`, `touch`, `buzzer`, `temp`, `imu`, `head`,
-`tail`. The brain must work with any subset. A body with no `head` is valid.
+`caps` lists what this board can do, from: `eyes`, `touch`, `buzzer`, `temp`, `imu`, `head`,
+`tail`. The brain must work with any subset.
 
 Event kinds from the dog: `pat` (the touch pad was pressed), `tipped` (the dog fell over),
 `upright` (it was set back up).
@@ -88,8 +107,10 @@ Event kinds from the dog: `pat` (the touch pad was pressed), `tipped` (the dog f
 
 The firmware decides what each state looks like. The laptop never sends colors or pins.
 
-If the laptop hears nothing from the dog for 3 seconds it treats the body as disconnected and
-keeps running. Detection, voice and escalation must all work with no body attached.
+If the brain hears nothing from the board for 3 seconds it treats it as disconnected and
+keeps running. Detection, voice and escalation must all work with no board attached.
+
+In the tables above, "dog" means this board and "laptop" means the brain.
 
 ---
 
@@ -106,9 +127,9 @@ Column names are exactly as written here.
 | `name` | text | "Argos" |
 | `person_label` | text | Who it watches, as a display label. Never a real full name. |
 | `state` | text | `calm`, `checking` or `alert` |
-| `last_seen_at` | timestamp | Heartbeat. The brain updates it every 5 seconds. |
-| `fw` | text, nullable | From the dog's `hello` |
-| `caps` | text array | From the dog's `hello`. Empty when no body is attached. |
+| `last_seen_at` | timestamp, nullable | Heartbeat. The brain updates it every 5 seconds. Null until the brain first reports. |
+| `fw` | text, nullable | A version label for the body, if it reports one |
+| `caps` | text array | What the body can do: the sensor board's `caps`, plus `head`, `antennas`, `camera`, `voice` when the robot is attached. Empty with no body. |
 
 ### `incidents`: one row per check cycle
 
@@ -120,7 +141,7 @@ Column names are exactly as written here.
 | `status` | text | `checking`, `stood_down`, `escalated` or `acknowledged` |
 | `confidence` | number 0 to 1, nullable | From the detector. Null for `manual`. |
 | `started_at` | timestamp | |
-| `ended_at` | timestamp, nullable | Set on `stood_down` and on `acknowledged` |
+| `ended_at` | timestamp, nullable | Set on `stood_down`. On `acknowledged` the brain sets it to the same instant as `acknowledged_at`, when it sees the acknowledgement. |
 | `stood_down_by` | text, nullable | `voice` or `pat` |
 | `summary` | text, nullable | One or two sentences on what Argos saw. Only on escalated incidents. |
 | `snapshot_path` | text, nullable | Storage path of one still image, `incidents/<incident id>/snapshot.jpg` in the private `snapshots` store. Only on escalated incidents. |
@@ -157,7 +178,7 @@ rule is about what is stored. The live view in section 6 is never stored at all.
 | `call_failed` | `{"to": "Daughter", "reason": "..."}` |
 | `email_sent` | `{"to": "Daughter", "dry_run": false}` |
 | `acknowledged` | `{"by": "Daughter"}` |
-| `room_alert` | `{"temp_c": 31.2}` |
+| `room_alert` | `{}`. Neither the detail nor the sentence states a temperature, because family reads events and does not read sensor readings. |
 | `device_tipped` | `{}` |
 
 `to` and `by` are always labels. Phone numbers and email addresses never appear in any record.
@@ -198,8 +219,9 @@ There is no anonymous access. Everyone signs in. There are two kinds of session:
 | Acknowledge an incident | Yes | Yes |
 
 **The one write the dashboard makes:** acknowledging an escalated incident. It sets `status`
-to `acknowledged`, fills `acknowledged_by` and `acknowledged_at`, and the brain returns the
-device to `calm`. The dashboard writes nothing else.
+to `acknowledged` and fills `acknowledged_by` and `acknowledged_at`. The brain then sets
+`ended_at`, records the `acknowledged` event and returns the device to `calm`. The
+dashboard writes nothing else.
 
 ---
 
@@ -222,7 +244,8 @@ Each line:
 
 Timestamps inside rows are written against the base time `2026-11-15T19:00:00Z`. On replay,
 shift every timestamp by the same amount so the base lands on the moment the replay started.
-When the last line has been applied, start again from the top.
+When the last line has been applied, start again from the top. So the last line is never
+seen for long: a fixture's last lines must leave things as its first lines set them.
 
 In replay mode `snapshot_path` points at no real file. Show a placeholder image.
 
