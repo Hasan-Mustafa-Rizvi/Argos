@@ -29,8 +29,9 @@ and what must stay true.
    not stop it.
 2. **Nothing real leaves by default.** A real call or a real email happens only when
    `ARGOS_DRY_RUN=0`.
-3. **Privacy.** No image or description is stored for an incident that stood down. Phone
-   numbers and email addresses never reach a record or the browser.
+3. **Privacy.** No image or description is stored for an incident that stood down. The live
+   view is never stored, and reaches only a family account that has passed its second
+   factor. Phone numbers and email addresses never reach a record or the browser.
 4. **No secrets in the repo.** It is public.
 5. **The demo has a manual trigger**, so a loud hall cannot stop it.
 
@@ -43,6 +44,7 @@ and what must stay true.
 | Microphone useless in the noise | Manual trigger starts the check. A pat stands it down. |
 | FaceTime call fails | `call_failed` is logged. Email and the dashboard still carry the alert. |
 | Camera detection misfires | The check exists for this. "I'm fine" or a pat stands it down. |
+| Live view frames stop | The centre panel shows the last frame faded and its age. Everything else keeps working. |
 
 ## Open questions
 
@@ -52,4 +54,5 @@ and what must stay true.
 | Does Chert access last through Sunday afternoon? | Open. The public trial is 24 hours. |
 | Email provider | Open. Decided at the escalation milestone. |
 | What the body has: servos, camera, speaker | Open. Waiting on the components list in `progress.md`. |
-| Demo accounts are reachable by anyone with the link during the event | Accepted for the demo. Snapshots are cleared and demo passwords changed after judging. |
+| Demo sessions are open to anyone with the link during the event | Accepted. A demo session plays the scripted run only and never receives live records or the live view. |
+| Does the venue network carry the live view at 4 frames a second? | Open. Test early on Sunday. The frame rate drops through `LIVE_VIEW_FPS`. |

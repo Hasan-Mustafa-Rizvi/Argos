@@ -15,6 +15,7 @@ files into `web/` unless the build plan says to.
 | Brutalist bento dashboard | `21st/bento-dashboard.tsx` | 21st.dev community component | As published on 21st.dev |
 | Finance bento | `21st/finance-bento.tsx` | Roman Vasnev, vasnev.art | As published on 21st.dev |
 | HackUTA 2026 site | `hackuta/HACKUTA_DESIGN_CONTEXT.md`, live at hackuta.com | HackUTA organizers | Their own |
+| Liquid Glass Logo Reveal | `21st/liquid-glass-logo-reveal.tsx` | 21st.dev component, shader ported from Zanwei Guo's Glass Icon Reveal | As published on 21st.dev; original MIT |
 | Glass Icon Reveal | `glass-icon-reveal/index.html` | Zanwei Guo, github.com/zanwei/glass-icon-reveal | MIT |
 
 ## What we take, and what we leave
@@ -67,9 +68,15 @@ files into `web/` unless the build plan says to.
 - **Leave:** its palette and its artwork. Argos is cobalt on cream, not black on terracotta,
   and must not look like a copy of the event's own site.
 
-### Glass Icon Reveal: one moment
+### Liquid Glass Logo Reveal: one moment
 
-- **Take:** a single recorded clip of the Argos mark being revealed, played once after
-  sign-in.
-- **Leave:** the tool itself. It is a standalone page with controls, not a component. We
-  record with it and ship the clip.
+- **Take:** the component itself, for the reveal after sign-in. `GlassIconReveal` accepts any
+  logo as SVG markup or an image URL, a backdrop colour and a logo colour, and has a still
+  fallback when WebGL is missing. Its opening comment credits the original and stays.
+- **Leave:** the `GlassReveal21st` wrapper and the 21st.dev mark baked into the file, and
+  looping. Note that `GlassIconReveal` is not exported in the file as published.
+
+### Glass Icon Reveal: the original
+
+- The standalone tool the component above was ported from. Kept for its README, which
+  explains how the effect works. Not used directly.

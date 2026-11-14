@@ -1,7 +1,7 @@
 # Argos software tracker
 
-**Last updated:** Sat Nov 14 2026, 3:30 PM CT
-**Status:** Visual identity, logo and web build plan written. W1 is ready to hand to a coding agent.
+**Last updated:** Sat Nov 14 2026, 3:50 PM CT
+**Status:** Contract v0.2 adds the live view. New logo traced. W1 is ready to hand to a coding agent.
 
 Hasan owns all software. This file records where the software is. Coding agents never edit it.
 
@@ -10,12 +10,12 @@ Hasan owns all software. This file records where the software is. Coding agents 
 | # | Milestone | Lane | State | Waiting on |
 |---|---|---|---|---|
 | M0 | Repo layout, ignore rules, agent rules, docs | root | Done | |
-| M1 | Contract v0.1 and scripted demo run | `contract/` | Done | |
+| M1 | Contract v0.2 and scripted demo run | `contract/` | Done | |
 | W1 | Web shell: tokens, landing, sign-in, logo reveal, empty dashboard frame | `web/` | Ready to start | |
-| W2 | Dashboard on replay data | `web/` | Not started | W1, decision on Argos's view |
-| M3 | Schema, access rules, live updates | `supabase/` | Not started | Supabase project |
-| W3 | Dashboard reads live data and real sign-in, keeps replay mode | `web/` | Not started | W2, M3 |
-| M5 | Brain: simulator first, then real detection and voice | `brain/` | Not started | M3 for writes |
+| W2 | Dashboard on replay data | `web/` | Not started | W1 |
+| M3 | Schema, access rules, second factor, live updates, live view channel | `supabase/` | Not started | Supabase project |
+| W3 | Dashboard reads live data, real sign-in with second factor, live view, keeps replay mode | `web/` | Not started | W2, M3 |
+| M5 | Brain: simulator first, then real detection, voice and live view frames | `brain/` | Not started | M3 for writes |
 | M6 | Escalation: FaceTime call and email, dry-run by default | `brain/` | Not started | Chert answers |
 | M7 | Firmware | `firmware/` | Not started | Components list |
 
@@ -33,7 +33,14 @@ Hasan owns all software. This file records where the software is. Coding agents 
 | Sat 3:30 PM | Identity: cobalt engraving on cream paper, two colours, from the Cobalt Toile landing | The landing template already has the Greek feel, so the dashboard adopts its rules instead of inventing a second look. |
 | Sat 3:30 PM | The page reprints in a different ink per state: cobalt, ochre, oxblood | The state is readable from across a room, and it uses the template's own palette mechanism. |
 | Sat 3:30 PM | Site flow: landing, sign-in, logo reveal, dashboard | Hasan's call. |
-| Sat 3:30 PM | The logo reveal is a recorded clip, not the WebGL tool embedded | The tool is a standalone page with controls. A clip is smaller and cannot break on a judge's phone. |
+| Sat 3:30 PM | ~~The logo reveal is a recorded clip~~ Replaced at 3:50 PM. | |
+| Sat 3:50 PM | The logo is Hasan's design: a seated hound in a ring of Greek key and laurel, traced to SVG | His call. It reprints in the page ink like everything else. |
+| Sat 3:50 PM | The logo reveal uses the liquid glass reveal component from 21st.dev with our mark | Hasan has used it before. It takes any logo and has a still fallback without WebGL. |
+| Sat 3:50 PM | The landing carries only what is planned now, a "who made this" section, and a credit line in the footer | Hasan's call. |
+| Sat 3:50 PM | **The centre of the dashboard is the live view from the dog's camera** | Hasan's call. The dashboard is only for signed-in people, so the feed is protected by sign-in and a second factor. |
+| Sat 3:50 PM | The live view is never stored, needs a second factor, goes to family accounts only, and is off unless switched on | Keeps the stored-image rule intact and keeps the family and clinician split consistent: clinicians already do not see images. |
+| Sat 3:50 PM | Demo sessions play the scripted run and never get live records or the live view | The demo buttons are public. Nothing real should be one tap away from a stranger. |
+| Sat 3:50 PM | Frames travel as small JPEGs over a private Supabase broadcast channel, 4 a second | No extra service. Free plan allows 256 KB a message and 100 messages a second; a frame is under 100 KB. |
 | Sat 3:30 PM | Reference source files stay on Hasan's machine, out of the repo | They are other people's work. The index and credits are in the repo. |
 | Sat 3:30 PM | Kimi dropped from the plan | Hasan's call. Cursor and Claude Code are the coding agents. |
 
@@ -55,16 +62,26 @@ General, Hardware, Chert (best use of FaceTime), ElevenLabs, MLH Gemini API, MLH
 
 ## Open decisions
 
-- **Argos's view.** The locked privacy rule rules out a live video feed in the centre panel.
-  Proposed: a figure drawn from body points, with the snapshot on alert. Needs Hasan's yes,
-  then a contract addition. See `design/BUILD_PLAN.md`.
+- None open. Argos's view was decided at 3:50 PM: it is the live view. See contract section 6.
 
 ## Backlog and known limits
 
 - The Chert integration is unresearched. It is the least certain part of the plan.
-- Demo accounts are open to anyone with the link while the event runs.
+- Demo sessions are open to anyone with the link while the event runs. They see the scripted run only.
+- The live view over the venue network is untested. Test early on Sunday.
+- A manual override was mentioned by Hasan as a possible later addition. Not specified yet.
 
 ## Log
+
+### Sat Nov 14, 3:50 PM
+Hasan's logo traced to SVG: emblem, a heavier cut for small sizes, a side-by-side lockup and a
+stacked lockup with the line "Guardian & Assistant". The original is kept in
+`design/logo/source/`. Hasan decided the centre panel is the live view, protected by sign-in
+and a second factor. Contract moved to v0.2 with section 6. Checked against Supabase's
+published limits: second factor by authenticator app is free on every plan and can be
+enforced in access rules; the free plan's broadcast limit is 256 KB a message and 100
+messages a second. Identity, build plan and the W1 prompt were revised for the new logo, the
+glass reveal component, the team section and the footer credit.
 
 ### Sat Nov 14, 3:30 PM
 Design groundwork. Read the Cobalt Toile landing template (MIT, one 150 KB file, React only,

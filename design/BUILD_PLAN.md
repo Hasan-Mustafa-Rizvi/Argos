@@ -1,6 +1,6 @@
 # Web build plan
 
-Version 0.1 · Sat Nov 14 2026
+Version 0.2 · Sat Nov 14 2026
 
 How the dashboard gets built, in what order, and which reference to open for each piece. Read
 `IDENTITY.md` first for the look, and `../contract/CONTRACT.md` for the data. Reference files
@@ -19,7 +19,7 @@ This plan covers `web/` only.
 | Route | What it is | Signed in? |
 |---|---|---|
 | `/` | The Cobalt Toile landing with Argos's words | No |
-| `/sign-in` | Two demo buttons and a real form | No |
+| `/sign-in` | A real form, and two buttons that open the demo | No |
 | `/dashboard` | The monitor. Family view or clinician view. | Yes. Without a session it sends you to `/sign-in`. |
 
 ---
@@ -64,31 +64,33 @@ arriving, the dashboard says so and offers replay.
 
 **Auth seam.** One interface with two implementations: a demo session held in the browser
 (W1), and Supabase sign-in (W3). It answers three questions: is someone signed in, what is
-their role (`family` or `clinician`), and how do they sign out.
+their role (`family` or `clinician`), is it a demo session, and how do they sign out. A demo
+session always gets replay data and never the live view.
 
 ---
 
 ## Argos's view: the centre panel
 
-This is the largest panel and the one a judge looks at first.
+This is the largest panel and the one a judge looks at first. It is the live view from the
+dog's camera. Decided by Hasan, Sat 3:25 PM.
 
-The team's locked privacy rule is that nothing is recorded continuously and an image leaves
-the room only after a check has failed. So the centre panel cannot be a live video feed. It
-shows this instead:
+**Who gets it.** Only a family account that has signed in and passed its second factor.
+Clinicians do not see images, live or stored. Demo sessions never receive it. Nothing in the
+live view is stored.
 
-| Device state | What the panel shows |
+| Situation | What the panel shows |
 |---|---|
-| `calm`, `checking` | A figure of the person, drawn from body points only and printed in dither on the night panel, like a figure on a vase. It moves as they move. No image has left the room. |
-| `alert` | Family: the one snapshot Argos took, printed in two-tone dither, with a control to show the original. Clinician: the figure, and a note that the image is shared with family only. |
-| Offline | The mark, faded, and when Argos was last seen. |
+| Family account, Argos online | The live view, printed in dither in the current ink. A control shows the original picture. A "LIVE" label and the time of the last frame. |
+| Family account, `alert` | The live view, with the stored snapshot from the moment of escalation beside or under it, and the Acknowledge button. |
+| Family account, frames stop for 5 s | The last frame, faded, and "No picture for N seconds". The rest of the dashboard keeps working. |
+| Clinician account | The mark and the line "The live view is for family". The panel gives its space to sensor history. |
+| Demo session | The mark and the line "The live view opens for signed-in family". |
+| Argos offline | The mark, faded, and when Argos was last seen. |
 
-A caption under the panel always says which of these it is, in plain words.
-
-**Status: needs Hasan's decision.** The figure needs body points sent from the laptop, which
-is an addition to the contract. Until that is decided, W2 builds the panel with the snapshot
-and offline states and a still figure.
-
----
+**How frames travel** is defined in `../contract/CONTRACT.md` section 6: small JPEG frames
+sent a few times a second over a private live channel. Low resolution and a low frame rate
+are fine, because the dither treatment is the look. This keeps the live view working on a
+poor venue network and needs no extra service.
 
 ## Work packages
 
@@ -106,7 +108,8 @@ Depends on nothing. Can start now.
 | Sign-in | `references/21st/sign-in.tsx` | The split layout only |
 | Sign-in scene | `references/21st/ridgeline-dither-footer.tsx` | The dither canvas, as a `DitherScene` with our cobalt ramp |
 | Mark | `logo/` | The three SVG files |
-| Reveal | `references/glass-icon-reveal/README.md` | Plays a recorded clip if present, a still mark if not |
+| Reveal | `references/21st/liquid-glass-logo-reveal.tsx` | The component, driven with our mark, paper and cobalt |
+| Who made this | `IDENTITY.md` section 7 | The team, in the template's list section |
 | Dashboard shell | `IDENTITY.md` section 7 | Header, meander, the grid of empty labelled plates, the state reprint |
 
 Proves itself when: the three routes work, both demo buttons reach the dashboard through the
@@ -114,7 +117,7 @@ reveal, the dashboard reprints in all three inks, and the site is live on Netlif
 
 ### W2. Dashboard on replay data
 
-Depends on W1 and the decision on Argos's view.
+Depends on W1 and contract v0.2.
 
 | Piece | Open this reference | Take |
 |---|---|---|
@@ -124,6 +127,7 @@ Depends on W1 and the decision on Argos's view.
 | Tick gauges | `references/21st/finance-bento.tsx`, `updateCash` and `updateGoals` | Rows of ticks, some filled |
 | Incidents | The ledger in the landing template | Rows that open |
 | Who sees what | `../contract/CONTRACT.md` section 4 | Family and clinician differences |
+| Argos's view | `../contract/CONTRACT.md` section 6, and `DitherScene` from W1 | The demo states now, the live frames in W3 |
 
 Proves itself when: the scripted run plays end to end, the state reprints at the right
 moments, an escalated incident can be acknowledged, and family and clinician see different
@@ -131,8 +135,8 @@ things.
 
 ### W3. Live data and real sign-in
 
-Depends on W2 and the Supabase project. Swaps in the live data source and Supabase sign-in
-behind the two seams. Replay stays.
+Depends on W2 and the Supabase project. Swaps in the live data source, Supabase sign-in with
+a second factor, and the live view channel, behind the two seams. Replay stays.
 
 ---
 
@@ -141,5 +145,6 @@ behind the two seams. Replay stays.
 - Nothing invented: no fake people, clients, numbers, quotes or press.
 - The landing template file is copied in whole and not edited, except where this plan names a
   removal. Its license comment stays at the top.
-- Every borrowed piece is listed in `web/CREDITS.md` with its author.
+- Every borrowed piece is listed in `web/CREDITS.md` with its author, and the landing footer
+  carries one credit line that links to it.
 - The checks in `IDENTITY.md` section 8 pass before a package is reported done.

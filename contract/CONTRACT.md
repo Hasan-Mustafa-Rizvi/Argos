@@ -1,6 +1,10 @@
 # Argos contract
 
-Version 0.1 · Sat Nov 14 2026
+Version 0.2 · Sat Nov 14 2026
+
+Changed in 0.2: section 6, the live view, is new. Section 4 gains the live view row and the
+second factor. The privacy rule in section 3 now says plainly that it is about what is
+stored. Nothing in sections 1, 2, 3 or 5 changed shape, so the fixtures are unchanged.
 
 This file is the agreement between the three software parts: the firmware on the dog, the
 brain on the laptop, and the dashboard. Each part is built against this file and the fixtures
@@ -124,7 +128,8 @@ Column names are exactly as written here.
 | `acknowledged_at` | timestamp, nullable | |
 
 **Privacy rule, absolute.** `summary` and `snapshot_path` are written only after an incident
-reaches `escalated`. A stood-down incident never has an image or a description stored.
+reaches `escalated`. A stood-down incident never has an image or a description stored. This
+rule is about what is stored. The live view in section 6 is never stored at all.
 
 ### `events`: the timeline, append only
 
@@ -174,11 +179,16 @@ One row every 5 seconds.
 
 ## 4. Who sees what
 
-There is no anonymous access. Everyone signs in. Two demo accounts exist so a judge can open
-either view with one tap.
+There is no anonymous access. Everyone signs in. There are two kinds of session:
+
+- **Real account.** Email and password, then a second factor from an authenticator app.
+  Reads live records.
+- **Demo.** Opens with one tap so a judge can see either view. Plays the scripted run in
+  section 5. A demo session never reads live records and never receives the live view.
 
 | | Family | Clinician |
 |---|---|---|
+| Live view (section 6), real account with second factor only | **Yes** | **No** |
 | Device state and last seen | Yes | Yes |
 | Incident list: trigger, status, times | Yes | Yes |
 | Timeline (`events`) | Yes | Yes |
@@ -217,3 +227,53 @@ When the last line has been applied, start again from the top.
 In replay mode `snapshot_path` points at no real file. Show a placeholder image.
 
 `fixtures/make_demo_scenario.py` regenerates the file. Edit the script, not the output.
+
+The fixtures carry no live view frames. In replay the centre panel shows its demo state.
+
+---
+
+## 6. The live view
+
+The live view is what the dog's camera sees, shown in the centre of the dashboard.
+
+**Three rules, absolute.**
+
+1. **Never stored.** No frame is written to a table, to storage, to a log or to disk, by the
+   brain, the backend or the dashboard. The only stored image is still the one snapshot on an
+   escalated incident.
+2. **Second factor only.** A frame reaches a browser only for a real account whose session
+   has passed its second factor, and whose role is `family` for that device. This is enforced
+   by the backend's access rules, not by the dashboard hiding a panel.
+3. **Off unless switched on.** The brain sends frames only when `ARGOS_LIVE_VIEW=1`. A
+   missing value means off.
+
+**How frames travel.** The brain publishes to a private live channel. Nothing is kept by the
+channel: a browser that is not listening at that moment never gets the frame.
+
+| | |
+|---|---|
+| Channel topic | `view:<device id>` |
+| Channel kind | Private broadcast. Joining needs a signed-in session that passes rule 2. |
+| Event name | `frame` |
+| Rate | `LIVE_VIEW_FPS`, default 4, never more than 8 |
+
+Each `frame` message:
+
+```json
+{"seq": 1042, "at": "2026-11-15T19:00:12.250Z", "w": 320, "h": 240, "jpeg": "<base64>"}
+```
+
+| Field | Type | Notes |
+|---|---|---|
+| `seq` | integer | Counts up from 0 each time the brain starts. A reader drops a frame whose `seq` is lower than the last one shown. |
+| `at` | timestamp | When the frame was captured. |
+| `w`, `h` | integer | Size in pixels. The long side is at most 480. |
+| `jpeg` | text | One JPEG image, base64. The whole message stays under 100 KB. |
+
+**For the reader.**
+
+- No frame for 5 seconds means the view has stopped. Show the last frame faded and say how
+  long ago it was. Everything else on the dashboard keeps working.
+- The reader never asks for a frame and never writes to the channel.
+- Frames are for looking at. Detection runs in the brain on the camera directly, never on
+  these frames.

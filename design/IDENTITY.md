@@ -1,6 +1,6 @@
 # Argos visual identity
 
-Version 0.1 · Sat Nov 14 2026
+Version 0.2 · Sat Nov 14 2026
 
 Argos looks like a cobalt engraving on cream paper: one ink, one paper, drawn lines, hatching
 and dither where other products use gradients and glass. It comes from four references, listed
@@ -105,8 +105,8 @@ For other inks, build the ramp the same way: mix ink into paper at 0, 12, 28, 46
   steps forward once each time Argos reports in, and it stops and fades when Argos is offline.
 - **Tick gauges.** Durations and levels are drawn as rows of small ticks, some filled, in the
   manner of a ruler on an engraving. Used for stillness and room temperature.
-- No gradients except inside dither. No glass, no blur, no drop shadows, no emoji, no stock
-  photos.
+- No gradients except inside dither. No blur, no drop shadows, no emoji, no stock photos.
+- Glass appears exactly once: the logo reveal after sign-in. Nowhere else.
 
 ---
 
@@ -118,7 +118,7 @@ For other inks, build the ramp the same way: mix ink into paper at 0, 12, 28, 46
 | Panel entering | Lines draw in, then the fill settles, as an etching | 400 ms |
 | Heartbeat | Meander steps one unit | 300 ms |
 | New timeline row | Slides down 8 px and fades in | 250 ms |
-| Sign-in to dashboard | The logo reveal, once per session, skippable | 2.5 s at most |
+| Sign-in to dashboard | The glass logo reveal, once per session, skippable | About 3 s |
 
 Under `prefers-reduced-motion` nothing moves. States still change colour, instantly.
 
@@ -126,12 +126,25 @@ Under `prefers-reduced-motion` nothing moves. States still change colour, instan
 
 ## 6. The mark
 
-`logo/argos-mark.svg` is a watching hound in profile inside a seal. It takes its colour from
-`currentColor`, so it reprints with the state like everything else. `logo/argos-lockup.svg`
-adds the wordmark. `logo/argos-mark-cobalt.svg` has fixed colours for tools that cannot read
-CSS, such as the logo reveal recorder.
+Hasan's design: a seated hound in line art, with a sensor at its ear and a tag on its collar,
+inside a ring of Greek key and laurel. The files in `logo/` are traced from his original,
+which is kept in `logo/source/`.
 
-Minimum size 24 px. Clear space of a quarter of its width on every side. Never on a photo.
+| File | Use |
+|---|---|
+| `argos-mark.svg` | The emblem. 64 px and larger. |
+| `argos-mark-bold.svg` | The emblem with heavier lines. Under 64 px, favicons, and the logo reveal. |
+| `argos-lockup.svg` | Emblem and wordmark side by side. Headers. |
+| `argos-lockup-stacked.svg` | Emblem, wordmark and the line "Guardian & Assistant". Landing, sign-in. |
+| `argos-mark-cobalt.svg` | Fixed cobalt, for places that cannot read CSS colour. |
+
+All but the last take their colour from `currentColor`, so the mark reprints with the state
+like everything else. It is never gold on charcoal in the product: it is ink on paper, or
+paper on the night panel.
+
+The Greek key in the mark's ring is the same line as the meander heartbeat on the dashboard.
+
+Minimum size 32 px. Clear space of a quarter of its width on every side. Never on a photo.
 
 ---
 
@@ -143,8 +156,12 @@ The Cobalt Toile landing template, printed in cobalt, with Argos's words. It alr
 identity. Change the copy, not the drawing.
 
 - Palette switcher off. Newsletter block removed: there is nothing to subscribe to.
-- The "press" list is removed or replaced with nothing invented. No fake articles, clients,
-  statistics or testimonials anywhere.
+- Nothing invented. No fake articles, clients, statistics, contact details or testimonials
+  anywhere. The page says what is planned now, and its words are updated when plans change.
+- **Who made this.** The template's press list becomes the team: Hasan, Neel and Farrell,
+  with design, interface polish and organization credited to Hasan.
+- **Credit in the footer.** One line names the landing template and its author and links to
+  the full credits.
 - The four bookmarks become the four things Argos does: watches, checks, stands down,
   escalates.
 - The ledger becomes the questions people ask: why not a watch, a phone, a pendant, a camera.
@@ -157,15 +174,18 @@ identity. Change the copy, not the drawing.
 The split layout from the sign-in reference. Left: the form on paper. Right: the ridgeline
 scene printed in cobalt dither, captioned as Ithaca on the horizon.
 
-- Two large buttons come first: "Open as family" and "Open as clinician". The email and
-  password form sits below them for a real account.
+- The email and password form is for real accounts, which also need a second factor.
+- Two buttons open the demo: "Open the demo as family" and "Open the demo as clinician".
+  The demo plays the scripted run and never shows the live view.
 - No social sign-in, no testimonials, no violet.
 
 ### The logo reveal
 
-After sign-in, the mark is revealed once, then the dashboard is there. The reveal is a
-recorded clip made with the glass icon reveal tool, with a still mark as the fallback. It can
-be skipped with any key or tap and never plays twice in a session.
+After sign-in, the mark is revealed once through a drop of glass, then the dashboard is
+there. It uses the liquid glass reveal component with `argos-mark-bold.svg`, the page's paper
+as the backdrop and cobalt as the logo colour. It does not loop. It can be skipped with any
+key or tap, never plays twice in a session, and falls back to a still mark where WebGL is
+missing or motion is reduced.
 
 ### Dashboard, `/dashboard`
 
@@ -193,7 +213,11 @@ page.
 ```
 
 - **State plate.** The state word, since when, and when Argos last reported.
-- **Argos's view.** The only dark panel. What it shows is defined in `BUILD_PLAN.md`.
+- **Argos's view.** The only dark panel, and the live view from the dog's camera for a
+  signed-in family account. Frames are
+  printed in dither in the current ink, with a control to show the original picture. A small
+  "LIVE" label and the time of the last frame sit in its corner. What it shows in each state
+  is defined in `BUILD_PLAN.md`.
 - **Acknowledge** is the only primary button on the page and only exists during an alert.
 - **Timeline.** Newest first. Each row is the time in mono and the event's sentence.
 - **Incidents.** Rows in the style of the landing's ledger. Opening an escalated row shows the

@@ -15,8 +15,8 @@ twenty years and was the first to recognize Odysseus when he came home.
 4. **Escalates** if they do not. It video calls the emergency contact with a live view,
    sends a backup email, and updates a dashboard for family and clinicians.
 
-Nothing has to be worn, nothing is recorded continuously, and an image leaves the room only
-after a check has failed.
+Nothing has to be worn and nothing is recorded continuously. The live view opens only for
+signed-in family, and an image is stored only after a check has failed.
 
 ## What is in this repo
 
@@ -43,5 +43,6 @@ Argos builds on other people's work, used under their licenses and credited here
 - **Ridgeline Dither Footer**, **Sign-in page**, **Brutalist bento dashboard** and
   **Finance bento** (Roman Vasnev), published on 21st.dev. Technique and layout references
   for the dither scenes, the sign-in page and the dashboard grid.
-- **Glass Icon Reveal** by Zanwei Guo (MIT). Used to record the logo reveal.
+- **Liquid Glass Logo Reveal**, published on 21st.dev, with its shader ported from **Glass
+  Icon Reveal** by Zanwei Guo (MIT). The logo reveal after sign-in.
 - **HackUTA 2026** website. Reference for the Odyssey theme.
