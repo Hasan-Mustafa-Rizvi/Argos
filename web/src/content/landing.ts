@@ -43,7 +43,7 @@ export const hero: ToileHero = {
 }
 
 export const clientsLabel = "Built with"
-export const clients = ["ESP32", "Supabase", "Gemini", "ElevenLabs", "Chert", "React"]
+export const clients = ["Raspberry Pi", "Reachy Mini", "Supabase", "Gemini", "ElevenLabs", "Chert", "React"]
 
 export const about: ToileAbout = {
   kicker: "The idea",
@@ -173,7 +173,7 @@ export const notes: ToileNote[] = [
   { title: "Ithaca", body: "Home. The place the person wants to stay." },
   { title: "The rule", body: "No image is stored unless a check fails." },
   { title: "Word home", body: "A video call to family, with what Argos sees." },
-  { title: "The body", body: "An ESP32 runs the eyes and the touch pad. A laptop does the thinking." },
+  { title: "The body", body: "A Reachy Mini robot is its eyes, ears and voice. A Raspberry Pi does the thinking." },
 ]
 
 export const contactBand: ToileContactBand = {

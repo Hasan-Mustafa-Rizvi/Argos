@@ -7,7 +7,7 @@ configure({ asyncUtilTimeout: 8000 })
 
 /*
  * jsdom has no media queries, no canvas and no WebGL. Media queries answer "no" unless a test
- * turns reduced motion on; canvases have no context, so the dither scenes simply do not draw.
+ * turns reduced motion on, and canvases have no context.
  */
 let reduceMotion = false
 

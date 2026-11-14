@@ -174,6 +174,16 @@
 
 /* -------------------------------------------------------------- meander */
 
+/*
+ * One Greek key for the site: the heartbeat, and the sign-in plate's top and bottom.
+ * 24 px wide, 12 px tall, a 2 px stroke. Never scaled.
+ * The wave is one running-dog curl, 48 by 24, the same stroke. It tiles; it is not a picture.
+ */
+:root {
+  --argos-key: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='12' viewBox='0 0 24 12'%3E%3Cpath d='M1 12V1H17V7H9V11H24' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E");
+  --argos-wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='24' viewBox='0 0 48 24'%3E%3Cpath d='M0,16C6,16,8,14,11,10C14,6,16,4,22,4C28,4,32,8,31,13C30,17,26,18,22,15C19,13,19,10,22,10C25,10,26,13,24,15C30,19,38,16,48,16' fill='none' stroke='%23000' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
 .argos-meander {
   position: relative;
   height: 12px;
@@ -185,8 +195,8 @@
   position: absolute;
   inset: 0;
   background-color: currentColor;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='12' viewBox='0 0 24 12'%3E%3Cpath d='M1 12V1H17V7H9V11H24' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E") 0 0 / 24px 12px repeat-x;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='12' viewBox='0 0 24 12'%3E%3Cpath d='M1 12V1H17V7H9V11H24' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E") 0 0 / 24px 12px repeat-x;
+  -webkit-mask: var(--argos-key) 0 0 / 24px 12px repeat-x;
+  mask: var(--argos-key) 0 0 / 24px 12px repeat-x;
   -webkit-mask-position: calc(var(--beat, 0) * 24px) 0;
   mask-position: calc(var(--beat, 0) * 24px) 0;
   transition:
@@ -374,9 +384,28 @@
   }
 }
 
-.argos-strip {
+/* The wave closes the page. Whole tiles only, centred, the page ink, 24 px tall. */
+.argos-wave {
   margin-top: auto;
-  height: clamp(88px, 12vw, 150px);
+  padding: 8px clamp(16px, 3vw, 32px) 14px;
+  color: var(--ink);
+}
+
+.argos-wave-clip {
+  display: flex;
+  justify-content: center;
+  height: 24px;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.argos-wave-run {
+  flex: none;
+  width: round(down, 100cqi, 48px);
+  height: 24px;
+  background-color: currentColor;
+  -webkit-mask: var(--argos-wave) 0 0 / 48px 24px repeat-x;
+  mask: var(--argos-wave) 0 0 / 48px 24px repeat-x;
 }
 
 .argos-dev {
@@ -835,36 +864,6 @@
   color: var(--ink);
 }
 
-/* ------------------------------------------------------- dither scene */
-
-.argos-scene {
-  position: relative;
-  margin: 0;
-  overflow: hidden;
-  background: var(--scene-paper, var(--paper));
-}
-
-.argos-scene canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-}
-
-.argos-scene figcaption {
-  position: absolute;
-  left: 16px;
-  bottom: 14px;
-  padding: 4px 8px;
-  background: var(--paper);
-  font-family: var(--font-display);
-  font-style: italic;
-  font-size: 15px;
-  color: var(--ink);
-}
-
 /* ------------------------------------------------------------ sign-in */
 
 .argos-signin {
@@ -970,15 +969,56 @@
   color: var(--soft);
 }
 
-.argos-signin-scene {
+/* A short band above the form. The seal is a fixed square, cropped, never squashed. */
+.argos-signin-plate {
   order: -1;
   flex: none;
-  height: 132px;
+  --seal: 460px;
 }
 
-.argos-signin-figure {
-  width: 100%;
-  height: 100%;
+.argos-signin-face {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 168px;
+  overflow: hidden;
+  background: var(--night);
+  color: var(--on-night);
+  border-bottom: 2px solid var(--ink);
+}
+
+.argos-signin-seal {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  top: 78%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.argos-keyline {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: none;
+  justify-content: center;
+  height: 12px;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+.argos-keyline-run {
+  flex: none;
+  width: round(down, 100cqi, 24px);
+  height: 12px;
+  background-color: currentColor;
+  -webkit-mask: var(--argos-key) 0 0 / 24px 12px repeat-x;
+  mask: var(--argos-key) 0 0 / 24px 12px repeat-x;
+}
+
+.argos-keyline-foot {
+  margin-top: auto;
+  transform: scaleY(-1);
 }
 
 @media (min-width: 768px) {
@@ -989,15 +1029,23 @@
     flex: 1 1 50%;
     padding: 48px;
   }
-  .argos-signin-scene {
+  .argos-signin-plate {
     order: 0;
     flex: 1 1 50%;
-    height: auto;
-    padding: 16px;
+    display: flex;
+    min-height: 100dvh;
+    padding: 20px;
+    --seal: max(158%, 118vh);
   }
-  .argos-signin-figure {
-    min-height: calc(100dvh - 32px);
+  .argos-signin-face {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: calc(100dvh - 40px);
     border: 2px solid var(--ink);
+  }
+  .argos-signin-seal {
+    top: 50%;
+    left: 50%;
   }
 }
 
@@ -1057,6 +1105,56 @@
 .argos-landing .ctl-fbrand .argos-landing-logo {
   width: 44px;
   height: 44px;
+}
+
+/* The template draws a short rule in front of every section label. It reads as a dash. */
+.argos-landing .ctl-kicker::before {
+  content: none;
+}
+
+.argos-team {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.argos-team .argos-plate {
+  gap: 8px;
+}
+
+.argos-team-name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.argos-team p {
+  margin: 0;
+}
+
+.argos-team-link {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: 44px;
+  margin-top: auto;
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 900px) {
+  .argos-team {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 /* ---------------------------------------------------------- motion */

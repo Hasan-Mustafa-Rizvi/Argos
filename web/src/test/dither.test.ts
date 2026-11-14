@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { BAYER, ditherIndex, sceneField } from "@/components/argos/dither"
+import { BAYER, ditherIndex } from "@/components/argos/dither"
 
 describe("dither", () => {
   it("has 64 distinct Bayer thresholds inside (0, 1)", () => {
@@ -22,19 +22,6 @@ describe("dither", () => {
       }
       expect(ditherIndex(-1, 7, b)).toBe(0)
       expect(ditherIndex(2, 7, b)).toBe(6)
-    }
-  })
-
-  it("builds a scene field for tall and wide canvases", () => {
-    for (const [cols, rows] of [
-      [180, 240],
-      [720, 60],
-    ]) {
-      const field = sceneField(cols, rows, 7)
-      expect(field.base).toHaveLength(cols * rows)
-      expect(field.horizon).toBeGreaterThan(0)
-      expect(field.horizon).toBeLessThan(rows)
-      expect(field.base.every((t) => Number.isFinite(t))).toBe(true)
     }
   })
 })

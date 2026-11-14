@@ -5,6 +5,8 @@ import { SnapshotPlaceholder } from "@/components/argos/SnapshotPlaceholder"
 import type { Incident } from "@/data/contract"
 import { endingLabel, formatClock, standDownLabel, triggerLabel } from "@/data/derive"
 
+import { printSentence } from "./sentence"
+
 const NUMERALS: readonly [number, string][] = [
   [1000, "M"],
   [900, "CM"],
@@ -98,7 +100,7 @@ export function IncidentsPlate({ incidents, person, wrapClassName }: IncidentsPl
                         </>
                       )}
                     </dl>
-                    {incident.summary && <p className="argos-summary">{incident.summary}</p>}
+                    {incident.summary && <p className="argos-summary">{printSentence(incident.summary)}</p>}
                     {incident.snapshot_path && <SnapshotPlaceholder />}
                   </div>
                 )}

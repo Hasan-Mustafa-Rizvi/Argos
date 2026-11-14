@@ -3,7 +3,6 @@ import { Eye, EyeOff } from "lucide-react"
 import { Link, useNavigate } from "react-router"
 
 import { ArgosMark } from "@/components/argos/ArgosMark"
-import { DitherScene } from "@/components/argos/DitherScene"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -115,8 +114,16 @@ export default function SignIn() {
         </div>
       </main>
 
-      <aside className="argos-signin-scene">
-        <DitherScene caption="Ithaca, on the horizon." className="argos-signin-figure" />
+      <aside className="argos-signin-plate">
+        <div className="argos-signin-face">
+          <div className="argos-keyline" aria-hidden="true">
+            <span className="argos-keyline-run" />
+          </div>
+          <ArgosMark variant="mark" label="Argos" className="argos-signin-seal" size="var(--seal)" />
+          <div className="argos-keyline argos-keyline-foot" aria-hidden="true">
+            <span className="argos-keyline-run" />
+          </div>
+        </div>
       </aside>
     </div>
   )

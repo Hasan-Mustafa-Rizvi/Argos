@@ -2,6 +2,8 @@ import { Plate } from "@/components/argos/Plate"
 import type { TimelineEvent } from "@/data/contract"
 import { formatClock } from "@/data/derive"
 
+import { printSentence } from "./sentence"
+
 /** Newest first: the time in mono, then the sentence the record carries, whatever its kind. */
 export function TimelinePlate({ events, wrapClassName }: { events: readonly TimelineEvent[]; wrapClassName?: string }) {
   return (
@@ -11,7 +13,7 @@ export function TimelinePlate({ events, wrapClassName }: { events: readonly Time
           {events.map((event) => (
             <li key={event.id}>
               <time dateTime={event.at}>{formatClock(event.at)}</time>
-              <span>{event.text}</span>
+              <span>{printSentence(event.text)}</span>
             </li>
           ))}
         </ol>

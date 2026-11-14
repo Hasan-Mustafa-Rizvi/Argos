@@ -3,6 +3,7 @@ import * as React from "react"
 import { ArgosMark } from "./ArgosMark"
 import { PAPER, STATE_INK } from "./ink"
 import {
+  FINAL_SCALE,
   LOGO_SCALE,
   reducedMotion,
   REVEAL_SPEED,
@@ -77,6 +78,7 @@ export function LogoReveal({ onDone }: LogoRevealProps) {
             speed={REVEAL_SPEED}
             tileSize={TILE_SIZE}
             logoScale={LOGO_SCALE}
+            finalScale={FINAL_SCALE}
             tuning={TUNING}
             onEnd={finish}
             style={{ position: "absolute", inset: 0, cursor: "default" }}

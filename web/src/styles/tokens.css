@@ -33,7 +33,7 @@
  * Offline treatment. IDENTITY gives "#46547e at 60%". Mixed into paper at 60% that ink is
  * 2.86:1 against paper, below the 3:1 floor even for the state word, so the ink is #46547e
  * itself (6.75:1) and the 60% fades the drawn parts instead: the meander, the mark and the
- * dithered scenes. See .argos-fade below.
+ * wave. See .argos-fade below.
  */
 [data-state="offline"] {
   --ink: #46547e;

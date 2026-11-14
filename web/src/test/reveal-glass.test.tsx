@@ -1,6 +1,7 @@
-import { fireEvent, screen } from "@testing-library/react"
+import { act, fireEvent, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 
+import { SAFETY_MS } from "@/components/argos/reveal"
 import type { GlassIconRevealProps } from "@/components/ui/liquid-glass-logo-reveal"
 
 import { renderApp } from "./render"
@@ -38,7 +39,10 @@ describe("logo reveal with WebGL2", () => {
       iconPlate: false,
       label: "Argos",
     })
-    expect(3.5 / (glass.props?.speed ?? 1)).toBeCloseTo(3, 1)
+    const present = glass.props?.tuning?.present ?? 2.4
+    const speed = glass.props?.speed ?? 1
+    expect((present + 1.1) / speed).toBeLessThanOrEqual(1.6)
+    expect((present + 1.1) / speed).toBeCloseTo(1.5, 1)
     expect(screen.queryByTestId("dashboard")).not.toBeInTheDocument()
 
     glass.props?.onEnd?.()
@@ -51,5 +55,23 @@ describe("logo reveal with WebGL2", () => {
     fireEvent.click(await screen.findByTestId("glass"))
     expect(glass.replays).toBe(0)
     expect(await screen.findByTestId("dashboard")).toBeInTheDocument()
+  })
+
+  it("reaches the dashboard after the safety timer if the glass never ends", async () => {
+    vi.useFakeTimers()
+    try {
+      renderApp("/dashboard", { role: "family", revealSeen: false })
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(1)
+      })
+      expect(screen.getByTestId("glass")).toBeInTheDocument()
+      expect(screen.queryByTestId("dashboard")).not.toBeInTheDocument()
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(SAFETY_MS)
+      })
+      expect(screen.getByTestId("dashboard")).toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

@@ -138,14 +138,7 @@ function mulberry32(seed: number): () => number {
   }
 }
 
-function hashString(s: string): number {
-  let h = 2166136261
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i)
-    h = Math.imul(h, 16777619)
-  }
-  return h >>> 0
-}
+// Argos edit: hashString only fed the press hover preview, which is gone.
 
 function r1(n: number): string {
   return String(Math.round(n * 10) / 10)
@@ -247,23 +240,7 @@ function formatCount(n: number): string {
   return Math.round(n).toLocaleString("en-US")
 }
 
-function categoriesOf(items: ToilePress[]): string[] {
-  const out = [] as string[]
-  for (const p of items) if (p.category && !out.includes(p.category)) out.push(p.category)
-  return out
-}
-
-function filterPress(items: ToilePress[], cat: string | null): ToilePress[] {
-  return cat ? items.filter((p) => p.category === cat) : items
-}
-
-// A one-word source becomes a monogram tile; longer ones a two-line wordmark.
-function wordmark(source: string): { mono: string; top: string; bottom: string } {
-  let words = source.trim().split(/\s+/).filter(Boolean)
-  if (words.length > 2 && /^the$/i.test(words[0])) words = words.slice(1)
-  if (words.length < 2) return { mono: (words[0] || "?").charAt(0).toUpperCase(), top: "", bottom: "" }
-  return { mono: "", top: words[0].toUpperCase(), bottom: words.slice(1).join(" ").toUpperCase() }
-}
+// Argos edit: categoriesOf, filterPress and wordmark only served the press masthead, which is gone.
 
 function paletteColors(name: string, ink?: string, paper?: string): { ink: string; paper: string } {
   const p = (PALETTES as { [k: string]: { ink: string; paper: string } })[name] || PALETTES.cobalt
@@ -295,14 +272,16 @@ const DEFAULT_HERO = {
   subtitle: "We partner with forward-thinking organisations to solve complex challenges and build lasting impact.",
   action: { label: "Explore solutions", href: "#solutions" },
   est: "Est. MCMXII",
-  edition: "Vol. I — Nº 01",
+  // Argos edit: em dash removed from this default, so a dropped prop cannot print one.
+  edition: "Vol. I, Nº 01",
 }
 
 const DEFAULT_CLIENTS = ["The Halden Trust", "Corvina Bank", "Museo Aurelio", "Northwind Rail", "Atlas Mutual", "Verity Labs", "Ostra Foods", "Kestrel Grid"]
 
 const DEFAULT_ABOUT = {
   kicker: "About the house",
-  statement: "We bring the patience of the old masters to the *problems of the new century* — and leave every organisation sturdier than we found it.",
+  // Argos edit: em dash removed from this default, so a dropped prop cannot print one.
+  statement: "We bring the patience of the old masters to the *problems of the new century*, and leave every organisation sturdier than we found it.",
   body: "Founded as a counting-house advisory in 1912, we now work with public institutions, family companies and founders on strategy, systems and the long work of change. Our teams stay small, our advice stays plain and our commitments run long.",
   stats: [
     { value: 112, label: "Years of practice" },
@@ -323,7 +302,8 @@ const DEFAULT_SOLUTIONS: ToileSolution[] = [
     kicker: "Strategy",
     title: "Strategy & Narrative",
     quote: "The plan that survives is the one people can retell without you.",
-    body: "We help leadership teams decide what matters, write it down plainly and carry it through an organisation — from the boardroom to the shop floor.",
+    // Argos edit: em dash removed from this default, so a dropped prop cannot print one.
+    body: "We help leadership teams decide what matters, write it down plainly and carry it through an organisation, from the boardroom to the shop floor.",
     points: ["Long-range strategy", "Board & investor narrative", "Operating principles"],
     art: "typewriter",
     tone: "paper",
@@ -374,30 +354,35 @@ const DEFAULT_SERVICES: ToileService[] = [
   {
     title: "Organisational Design",
     summary: "Structures that let good people do their best work.",
-    details: "We map how work actually flows, then redraw teams, roles and rituals around it — with the people who will live inside the new shape.",
+    // Argos edit: em dash removed from this default, so a dropped prop cannot print one.
+    details: "We map how work actually flows, then redraw teams, roles and rituals around it, with the people who will live inside the new shape.",
     deliverables: ["Operating model", "Role charters", "Transition plan"],
-    duration: "10–14 weeks",
+    // Argos edit: en dash between these numbers replaced with a hyphen.
+    duration: "10-14 weeks",
   },
   {
     title: "Digital Transformation",
     summary: "Modern systems, adopted rather than installed.",
     details: "From platform choice to the last training session. We measure success by what people still use a year after we leave.",
     deliverables: ["Platform roadmap", "Vendor selection", "Adoption programme"],
-    duration: "4–9 months",
+    // Argos edit: en dash between these numbers replaced with a hyphen.
+    duration: "4-9 months",
   },
   {
     title: "Research & Foresight",
     summary: "Evidence first, then a view of the decade ahead.",
     details: "Primary research, expert panels and scenario work that turn uncertainty into a short list of bets worth making.",
     deliverables: ["Field research", "Scenario atlas", "Signals briefing"],
-    duration: "6–8 weeks",
+    // Argos edit: en dash between these numbers replaced with a hyphen.
+    duration: "6-8 weeks",
   },
   {
     title: "Capital & Partnerships",
     summary: "The right money and the right allies, on the right terms.",
     details: "Preparing for investment, joint ventures and acquisitions, and staying in the room through diligence and integration.",
     deliverables: ["Investment case", "Partner shortlist", "Integration plan"],
-    duration: "8–16 weeks",
+    // Argos edit: en dash between these numbers replaced with a hyphen.
+    duration: "8-16 weeks",
   },
 ]
 
@@ -422,7 +407,8 @@ const DEFAULT_NOTES: ToileNote[] = [
 
 const DEFAULT_CONTACT_BAND = {
   title: "Let us build something *lasting*.",
-  body: "Tell us about the challenge. A partner — never a salesperson — replies within two working days.",
+  // Argos edit: em dashes removed from this default, so a dropped prop cannot print one.
+  body: "Tell us about the challenge. A partner, never a salesperson, replies within two working days.",
   // Argos edit: email address removed from the source; the repository holds no contact details.
   action: { label: "Book a conversation", href: "#contact" },
   secondary: { label: "Read the Almanac", href: "#insights" },
@@ -1529,57 +1515,7 @@ function TowerArt({ t }: { t: Tone }) {
   )
 }
 
-/* --------------------------------------------------------- small vignettes */
-
-function Vignette({ kind }: { kind: number }) {
-  const pat = usePat()
-  return (
-    <svg className="ctl-svg" viewBox="0 0 240 150" width="100%" aria-hidden="true">
-      <rect width="240" height="150" className={kind === 1 ? "ctl-bp" : "ctl-bi"} />
-      {kind === 0 && (
-        <g className="ctl-si" {...LINE}>
-          <rect width="240" height="150" fill={pat("hz", "i")} opacity="0.3" stroke="none" />
-          <path d="M0 122 C60 112 120 118 240 110 V150 H0 Z" className="ctl-bi" strokeWidth="0.6" />
-          <Temple x={120} base={124} w={130} t="i" />
-          <Cypress x={36} base={122} h={46} t="i" />
-          <Cypress x={204} base={120} h={52} t="i" />
-        </g>
-      )}
-      {kind === 1 && (
-        <g>
-          {scatterStars(3, 40, 0, 0, 240, 150).map((s, i) => (
-            <circle key={i} cx={s.x} cy={s.y} r={s.r} className="ctl-fp" />
-          ))}
-          <circle cx="160" cy="62" r="26" className="ctl-fp" />
-          <circle cx="172" cy="56" r="26" className="ctl-bp" />
-          <g className="ctl-si" {...LINE} strokeWidth="0.9">
-            <path className="ctl-bi" d="M56 150 V90 A44 44 0 0 1 144 90 V150 H130 V92 A30 30 0 0 0 70 92 V150 Z" />
-            <path d="M130 92 A30 30 0 0 0 70 92 V150 M56 150 V90" fill={pat("h2", "i")} />
-          </g>
-        </g>
-      )}
-      {kind === 2 && (
-        <g className="ctl-si" {...LINE}>
-          <rect width="240" height="150" fill={pat("d", "i")} opacity="0.25" stroke="none" />
-          <g transform="translate(120 140) scale(1.25)">
-            <Vase t="i" kind={0} />
-          </g>
-          <Bloom x={36} y={126} R={16} t="i" />
-          <Bloom x={204} y={124} R={14} t="i" rot={1} />
-        </g>
-      )}
-      {kind === 3 && (
-        <g className="ctl-si" {...LINE}>
-          <rect y="96" width="240" height="54" fill={pat("hz", "i")} stroke="none" />
-          <g transform="translate(120 98) scale(1.6)">
-            <Boat t="i" />
-          </g>
-          <Birds list={[[40, 30, 0.8], [62, 22, 0.6], [170, 40, 0.7]]} t="i" />
-        </g>
-      )}
-    </svg>
-  )
-}
+// Argos edit: the press hover preview is gone, and so is the vignette that only it drew.
 
 /* ----------------------------------------------------------- toile pieces */
 
@@ -2331,26 +2267,15 @@ function Services({ copy, items, id }: { copy: typeof DEFAULT_SERVICES_COPY; ite
 }
 
 function Insights({ copy, items, id, reduced }: { copy: typeof DEFAULT_PRESS_COPY; items: ToilePress[]; id: string; reduced: boolean }) {
-  const [cat, setCat] = React.useState(null as string | null)
-  const [all, setAll] = React.useState(false)
-  const [hov, setHov] = React.useState(null as number | null)
-  const prev = React.useRef(null as HTMLElement | null)
-  const cats = categoriesOf(items)
-  const list = filterPress(items, cat)
-  const shown = all ? list : list.slice(0, 5)
-  const fine = React.useRef(false)
-  React.useEffect(() => {
-    fine.current = window.matchMedia("(pointer: fine)").matches && !reduced
-  }, [reduced])
-  const place = (e: React.PointerEvent) => {
-    const el = prev.current
-    if (!el || !fine.current) return
-    const x = Math.min(e.clientX + 24, window.innerWidth - 250)
-    el.style.transform = "translate3d(" + x + "px," + (e.clientY - 80) + "px,0)"
-  }
-  const cur = hov === null ? null : shown[hov]
   return (
-    <section className="ctl-sec" data-sec="insights" id={id} aria-labelledby={id + "-h"} style={{ paddingBottom: 0 }}>
+    <section
+      className="ctl-sec"
+      data-sec="insights"
+      id={id}
+      aria-labelledby={id + "-h"}
+      data-reduced={reduced ? "" : undefined}
+      style={{ paddingBottom: 0 }}
+    >
       <div className="ctl-wrap">
         <div className="ctl-presshead" data-rv="">
           <div>
@@ -2360,86 +2285,27 @@ function Insights({ copy, items, id, reduced }: { copy: typeof DEFAULT_PRESS_COP
               <Icon name="ne" />
             </h2>
           </div>
-          {cats.length > 1 && (
-            <div className="ctl-chips" role="group" aria-label="Filter press">
-              <button type="button" className="ctl-chip" aria-pressed={cat === null} onClick={() => setCat(null)}>
-                All<sup>{items.length}</sup>
-              </button>
-              {cats.map((c) => (
-                <button key={c} type="button" className="ctl-chip" aria-pressed={cat === c} onClick={() => setCat(cat === c ? null : c)}>
-                  {c}
-                  <sup>{items.filter((p) => p.category === c).length}</sup>
-                </button>
-              ))}
-            </div>
-          )}
         </div>
-        <ul className="ctl-press" onPointerMove={place} onPointerLeave={() => setHov(null)} data-rv="">
-          {shown.map((p, i) => {
-            const wm = wordmark(p.source)
-            const inner = (
-              <>
-                <span className="ctl-prlogo" aria-hidden="true">
-                  {wm.mono ? (
-                    <span className="ctl-mono">{wm.mono}</span>
-                  ) : (
-                    <span className="ctl-wm">
-                      <b>{wm.top}</b>
-                      <small>{wm.bottom}</small>
-                    </span>
-                  )}
-                </span>
-                <span>
-                  <span className="ctl-prt">{p.title}</span>
-                  <span className="ctl-prm">
-                    <span>{p.source}</span>
-                    <i aria-hidden="true" />
-                    <span>{p.date}</span>
-                  </span>
-                </span>
-                <span className="ctl-prarrow" aria-hidden="true">
-                  <Icon name="ne" size={26} />
-                </span>
-              </>
-            )
-            return (
-              <li key={(cat ?? "all") + p.title}>
+        {/* Argos edit: three plain cards in place of the press masthead, its chips, dates and hover preview. */}
+        <ul className="argos-team">
+          {items.map((p) => (
+            <li key={p.title} className="argos-plate">
+              <p className="argos-team-name">{p.title}</p>
+              <p>{p.source}</p>
+              {p.href ? (
                 <a
-                  className="ctl-pr"
-                  style={{ animationDelay: i * 0.05 + "s" }}
-                  href={p.href ?? "#"}
-                  target={p.href && /^https?:/.test(p.href) ? "_blank" : undefined}
-                  rel={p.href && /^https?:/.test(p.href) ? "noreferrer" : undefined}
-                  onClick={(e) => {
-                    if (!p.href) e.preventDefault()
-                  }}
-                  onPointerEnter={(e) => {
-                    place(e)
-                    setHov(i)
-                  }}
-                  onFocus={() => setHov(null)}
+                  className="argos-team-link"
+                  href={p.href}
+                  target={/^https?:/.test(p.href) ? "_blank" : undefined}
+                  rel={/^https?:/.test(p.href) ? "noreferrer" : undefined}
                 >
-                  {inner}
+                  GitHub
                 </a>
-              </li>
-            )
-          })}
+              ) : null}
+            </li>
+          ))}
         </ul>
-        {list.length > 5 && (
-          <div className="ctl-more">
-            <button type="button" className="ctl-btn ctl-btn-ghost" onClick={() => setAll((v) => !v)} aria-expanded={all}>
-              <span>{all ? "Show fewer" : "Show all " + list.length}</span>
-            </button>
-          </div>
-        )}
       </div>
-      <figure ref={prev} className="ctl-preview" data-on={cur !== null && fine.current} aria-hidden="true">
-        <Vignette kind={cur ? hashString(cur.title) % 4 : 0} />
-        <figcaption>
-          <span>{cur?.source ?? ""}</span>
-          <span>{cur?.category ?? ""}</span>
-        </figcaption>
-      </figure>
     </section>
   )
 }

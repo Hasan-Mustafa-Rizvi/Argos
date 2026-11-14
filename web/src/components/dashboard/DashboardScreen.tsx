@@ -7,9 +7,9 @@ import { ArgosMark } from "@/components/argos/ArgosMark"
 import { ArgosView } from "@/components/argos/ArgosView"
 import { Chip } from "@/components/argos/Chip"
 import { DevControls } from "@/components/argos/DevControls"
-import { DitherScene } from "@/components/argos/DitherScene"
-import { paperRamp, STATE_INK, type InkState } from "@/components/argos/ink"
+import type { InkState } from "@/components/argos/ink"
 import { Meander } from "@/components/argos/Meander"
+import { Wave } from "@/components/argos/Wave"
 import { SnapshotPlaceholder } from "@/components/argos/SnapshotPlaceholder"
 import { Button } from "@/components/ui/button"
 import { useDashboardView, useDataSource } from "@/data/context"
@@ -115,8 +115,6 @@ export function DashboardScreen() {
         )}
       </main>
 
-      <DitherScene tones={paperRamp(STATE_INK[state])} className="argos-strip argos-fade" />
-
       {dev && (
         <DevControls
           override={override}
@@ -131,6 +129,8 @@ export function DashboardScreen() {
           }
         />
       )}
+
+      <Wave />
     </div>
   )
 }
