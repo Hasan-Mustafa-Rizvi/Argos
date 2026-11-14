@@ -1,0 +1,30 @@
+# Local only
+prompts/
+.env
+.env.*
+!.env.example
+*.local
+
+# Dependencies and builds
+node_modules/
+dist/
+build/
+.vite/
+.netlify/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pio/
+
+# Captures and test media
+snapshots/
+clips/
+*.mp4
+*.mov
+
+# Editors and OS
+.DS_Store
+Thumbs.db
+.idea/
+*.log
