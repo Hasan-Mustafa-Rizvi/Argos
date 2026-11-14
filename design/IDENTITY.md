@@ -1,6 +1,6 @@
 # Argos visual identity
 
-Version 0.3 · Sat Nov 14 2026
+Version 0.4 · Sat Nov 14 2026
 
 Argos looks like a cobalt engraving on cream paper: one ink, one paper, drawn lines, hatching
 and dither where other products use gradients and glass. It comes from four references, listed
@@ -100,8 +100,15 @@ For other inks, build the ramp the same way: mix ink into paper at 0, 12, 28, 46
 
 - **Hatching** fills anything that would otherwise be a flat tint: shadows, the stillness
   gauge's unfilled part, disabled buttons.
-- **Ordered dither** (8 by 8 Bayer, 2 px cells) is how images are printed: the ridgeline
-  scene, Argos's view, the snapshot's default treatment.
+- **One art language: line engraving.** The landing's drawings and the logo are engraved
+  line. Every ornament on the site is drawn the same way: crisp lines in the page ink, at
+  their natural size, never stretched, never a pixel texture. The references were where the
+  look came from, not things to copy: there is no dithered landscape anywhere.
+- **Ordered dither** (8 by 8 Bayer, 2 px cells) is kept for one job only: printing camera
+  pictures in the page ink, in Argos's view and on the snapshot. It is never scenery.
+- **The wave.** A classical wave scroll, the border the Greeks' successors named the running
+  dog, closes the dashboard at the bottom, as the meander opens it at the top. It is a
+  repeating line pattern, not a picture.
 - **The meander.** A Greek key line runs under the dashboard header. It is the heartbeat: it
   steps forward once each time Argos reports in, and it stops and fades when Argos is offline.
 - **Tick gauges.** Durations and levels are drawn as rows of small ticks, some filled, in the
@@ -119,7 +126,7 @@ For other inks, build the ramp the same way: mix ink into paper at 0, 12, 28, 46
 | Panel entering | Lines draw in, then the fill settles, as an etching | 400 ms |
 | Heartbeat | Meander steps one unit | 300 ms |
 | New timeline row | Slides down 8 px and fades in | 250 ms |
-| Sign-in to dashboard | The glass logo reveal, once per session, skippable | About 3 s |
+| Sign-in to dashboard | The glass logo reveal, once per session, skippable. Gentle: the mark is readable in every frame. | About 1.5 s |
 
 Under `prefers-reduced-motion` nothing moves. States still change colour, instantly.
 
@@ -172,8 +179,9 @@ identity. Change the copy, not the drawing.
 
 ### Sign-in, `/sign-in`
 
-The split layout from the sign-in reference. Left: the form on paper. Right: the ridgeline
-scene printed in cobalt dither, captioned as Ithaca on the horizon.
+The split layout from the sign-in reference. Left: the form on paper. Right: an engraved
+plate on the night colour: the Argos mark very large and cropped by the panel's edges,
+inside a Greek key border.
 
 - The email and password form is for real accounts, which also need a second factor.
 - Two buttons open the demo: "Open the demo as family" and "Open the demo as clinician".
@@ -209,7 +217,7 @@ page.
 ├───────────────┴──────────────────────────────────────┴───────────────────────┤
 │ INCIDENTS  (ledger rows that open)          │ SENSOR HISTORY (clinician only)│
 ├──────────────────────────────────────────────────────────────────────────────┤
-│ ridgeline strip, cobalt dither                                               │
+│ wave scroll band, line art in the page ink                                   │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
