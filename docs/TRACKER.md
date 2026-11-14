@@ -13,7 +13,7 @@ Hasan owns all software. This file records where the software is. Coding agents 
 | M1 | Contract v0.2 and scripted demo run | `contract/` | Done | |
 | W1 | Web shell: tokens, landing, sign-in, logo reveal, empty dashboard frame | `web/` | Ready to start, one prompt with W2 | |
 | W2 | Dashboard on replay data | `web/` | Ready to start, one prompt with W1 | |
-| M3 | Schema, access rules, second factor, live updates, live view channel | `supabase/` | Ready to start | |
+| M3 | Schema, access rules, second factor, live updates, live view channel | `supabase/` | Applied and tested. Three dashboard switches and the first account are Hasan's. | |
 | W3 | Dashboard reads live data, real sign-in with second factor, live view, keeps replay mode | `web/` | Not started | W2, M3 |
 | M5 | Brain: simulator first, then real detection, voice and live view frames | `brain/` | Not started | M3 for writes |
 | M6 | Escalation: FaceTime call and email, dry-run by default | `brain/` | Not started | Chert answers |
@@ -74,6 +74,17 @@ General, Hardware, Chert (best use of FaceTime), ElevenLabs, MLH Gemini API, MLH
 - A manual override was mentioned by Hasan as a possible later addition. Not specified yet.
 
 ## Log
+
+### Sat Nov 14, 4:25 PM
+M3 applied to the Supabase project "Argos" from `supabase/schema.sql`. Tested inside a
+transaction that was rolled back, with made-up users: the public key alone is refused; a
+password-only session reads nothing; a family member with a second factor reads the device,
+incidents and timeline but no readings; a clinician reads readings; a signed-in outsider
+reads nothing; a member can acknowledge an escalated incident and cannot acknowledge a
+stood-down one, edit a summary, set any other status or insert anything; the database itself
+refuses a summary on a stood-down incident. Not yet tested, because they need a real
+session: the live view channel rule and the snapshot storage rule. The combined web prompt
+was reviewed by a second agent against the contract and the fixture; fourteen fixes applied.
 
 ### Sat Nov 14, 4:05 PM
 Web work regrouped into two prompts: W1 and W2 together (the whole site on demo data), then

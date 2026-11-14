@@ -123,7 +123,7 @@ Column names are exactly as written here.
 | `ended_at` | timestamp, nullable | Set on `stood_down` and on `acknowledged` |
 | `stood_down_by` | text, nullable | `voice` or `pat` |
 | `summary` | text, nullable | One or two sentences on what Argos saw. Only on escalated incidents. |
-| `snapshot_path` | text, nullable | Storage path of one still image. Only on escalated incidents. |
+| `snapshot_path` | text, nullable | Storage path of one still image, `incidents/<incident id>/snapshot.jpg` in the private `snapshots` store. Only on escalated incidents. |
 | `acknowledged_by` | text, nullable | A contact label such as "Daughter" |
 | `acknowledged_at` | timestamp, nullable | |
 

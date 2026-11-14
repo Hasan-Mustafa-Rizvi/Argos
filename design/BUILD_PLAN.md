@@ -43,7 +43,7 @@ web/
     data/               the data seam, below
     auth/               the auth seam, below
     styles/             tokens.css: every variable from IDENTITY.md section 1
-  public/               logo files, the reveal clip
+  public/               logo files, favicon
 ```
 
 ## Two seams that let the rest be built now
@@ -63,8 +63,9 @@ and one action, acknowledge. Replay stays in the product for good. If live data 
 arriving, the dashboard says so and offers replay.
 
 **Auth seam.** One interface with two implementations: a demo session held in the browser
-(W1), and Supabase sign-in (W3). It answers three questions: is someone signed in, what is
-their role (`family` or `clinician`), is it a demo session, and how do they sign out. A demo
+(W1), and Supabase sign-in (W3). It answers: is someone signed in, what is their role
+(`family` or `clinician`), is it a demo session, has it passed its second factor, and how do
+they sign out. A demo
 session always gets replay data and never the live view.
 
 ---
@@ -109,7 +110,7 @@ Depends on nothing. Can start now.
 | Landing words | `../progress.md` | The idea, how it behaves, the "why not X" answers |
 | Sign-in | `references/21st/sign-in.tsx` | The split layout only |
 | Sign-in scene | `references/21st/ridgeline-dither-footer.tsx` | The dither canvas, as a `DitherScene` with our cobalt ramp |
-| Mark | `logo/` | The three SVG files |
+| Mark | `logo/` | The SVG files, used as `IDENTITY.md` section 6 says |
 | Reveal | `references/21st/liquid-glass-logo-reveal.tsx` | The component, driven with our mark, paper and cobalt |
 | Who made this | `IDENTITY.md` section 7 | The team, in the template's list section |
 | Dashboard shell | `IDENTITY.md` section 7 | Header, meander, the grid of empty labelled plates, the state reprint |
@@ -145,8 +146,9 @@ a second factor, and the live view channel, behind the two seams. Replay stays.
 ## Rules for every work package
 
 - Nothing invented: no fake people, clients, numbers, quotes or press.
-- The landing template file is copied in whole and not edited, except where this plan names a
-  removal. Its license comment stays at the top.
+- The landing template file is copied in whole. Edits are allowed only to remove a default
+  that props cannot clear, and to remove any phone number or email address from the source.
+  Each edit is marked and reported. Its license comment stays at the top.
 - Every borrowed piece is listed in `web/CREDITS.md` with its author, and the landing footer
   carries one credit line that links to it.
 - The checks in `IDENTITY.md` section 8 pass before a package is reported done.
