@@ -1,5 +1,7 @@
 # Local only
 prompts/
+design/references/*
+!design/references/README.md
 .env
 .env.*
 !.env.example

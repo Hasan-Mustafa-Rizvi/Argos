@@ -27,9 +27,21 @@ after a check has failed.
 | `brain/` | The program on the laptop: detection, voice, escalation |
 | `firmware/` | The ESP32 code for the dog's body |
 | `supabase/` | Database schema and access rules |
+| `design/` | Visual identity, logo and the web build plan |
 | `docs/` | Architecture and the build tracker |
 | `progress.md` | The team's idea, decisions and checklist |
 
 ## Team
 
 Hasan, Neel and Farrell.
+
+## Credits
+
+Argos builds on other people's work, used under their licenses and credited here.
+
+- **Cobalt Toile Landing** by Kedhareswer Naidu (MIT). The landing page template.
+- **Ridgeline Dither Footer**, **Sign-in page**, **Brutalist bento dashboard** and
+  **Finance bento** (Roman Vasnev), published on 21st.dev. Technique and layout references
+  for the dither scenes, the sign-in page and the dashboard grid.
+- **Glass Icon Reveal** by Zanwei Guo (MIT). Used to record the logo reveal.
+- **HackUTA 2026** website. Reference for the Odyssey theme.

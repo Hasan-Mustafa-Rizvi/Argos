@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="argos-mark-title">
+  <title id="argos-mark-title">Argos</title>
+  <circle cx="32" cy="32" r="29.5" fill="none" stroke="#2238c4" stroke-width="2.5"/>
+  <circle cx="32" cy="32" r="25.6" fill="none" stroke="#2238c4" stroke-width="0.8" stroke-dasharray="1.2 2.2"/>
+  <path fill="#2238c4" d="M20.2 51.6
+    C19.2 45.6 19.4 40 20.6 35
+    C21.4 31.2 21.8 27.6 22.8 24.2
+    C23.8 19 24.8 13.8 26.6 9
+    C29.6 12 31.8 15.6 33.4 19.6
+    C35.6 20 37.6 20.8 39.4 22
+    C41.8 23.4 43.8 24.8 45.8 26
+    C49 27.6 52.2 29 54.8 30.8
+    C56.9 32 57.5 33.9 56.7 35.5
+    C55.9 37.1 54.1 37.9 52.1 37.9
+    C49.1 38.1 46.1 38.5 43.5 39.5
+    C41.5 40.3 40.1 41.9 39.5 43.9
+    C39 46.6 39.2 49.2 39.9 51.8
+    C33.4 54.4 26.6 54.3 20.2 51.6 Z"/>
+  <ellipse cx="41.2" cy="28.3" rx="1.6" ry="1" transform="rotate(-18 41.2 28.3)" fill="#f7f4ec"/>
+  <path d="M55.6 35.6 C52.8 35.2 50.2 35.4 47.6 36.2" fill="none" stroke="#f7f4ec" stroke-width="0.9" stroke-linecap="round"/>
+  <path d="M20.4 44.8 C26.4 47.2 33 47.2 39.2 45" fill="none" stroke="#f7f4ec" stroke-width="2" stroke-linecap="round"/>
+  <path d="M27.6 13.6 C28.8 16.6 29.6 19.4 30 22.4" fill="none" stroke="#f7f4ec" stroke-width="1.1" stroke-linecap="round"/>
+</svg>
