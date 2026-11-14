@@ -1,0 +1,76 @@
+@import "tailwindcss";
+@import "shadcn/tailwind.css";
+@import "./styles/tokens.css";
+@import "./styles/argos.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Two colours only: Tailwind's default palette is removed so nothing else can be reached for. */
+@theme {
+  --color-*: initial;
+}
+
+@theme inline {
+  --font-sans: "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Libre Baskerville", Georgia, "Times New Roman", serif;
+  --font-display: "Libre Baskerville", Georgia, "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-text: var(--text);
+  --color-soft: var(--soft);
+  --color-line: var(--line);
+  --color-wash: var(--wash);
+  --color-night: var(--night);
+  --color-on-night: var(--on-night);
+
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+
+  /* Plates and buttons are square: 0 to 2 px. Chips use rounded-full. */
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: var(--radius);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius);
+  --radius-2xl: var(--radius);
+  --radius-3xl: var(--radius);
+  --radius-4xl: var(--radius);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 2px;
+  }
+}

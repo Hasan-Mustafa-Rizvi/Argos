@@ -1,0 +1,99 @@
+/*
+ * Argos tokens, from design/IDENTITY.md section 1.
+ *
+ * Two colours: paper and one ink. --ink is set by data-state on the dashboard root; every
+ * other colour is mixed from ink and paper, so changing --ink reprints the whole page.
+ * The landing and sign-in pages never set data-state and stay cobalt.
+ */
+
+@property --ink {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #2238c4;
+}
+
+:root {
+  --paper: #f7f4ec;
+  --ink: #2238c4;
+}
+
+[data-state="calm"] {
+  --ink: #2238c4;
+}
+
+[data-state="checking"] {
+  --ink: #8a5a0b;
+}
+
+[data-state="alert"] {
+  --ink: #7a1d2b;
+}
+
+/*
+ * Offline treatment. IDENTITY gives "#46547e at 60%". Mixed into paper at 60% that ink is
+ * 2.86:1 against paper, below the 3:1 floor even for the state word, so the ink is #46547e
+ * itself (6.75:1) and the 60% fades the drawn parts instead: the meander, the mark and the
+ * dithered scenes. See .argos-fade below.
+ */
+[data-state="offline"] {
+  --ink: #46547e;
+}
+
+/*
+ * Derived colours resolve where they are declared, so they are declared again wherever the
+ * ink can change. Otherwise they would keep the value computed at :root.
+ */
+:root,
+[data-state="calm"],
+[data-state="checking"],
+[data-state="alert"],
+[data-state="offline"] {
+  --text: color-mix(in oklab, var(--ink) 42%, #0b0b14);
+  --soft: color-mix(in oklab, var(--text) 74%, var(--paper));
+  --line: color-mix(in oklab, var(--ink) 24%, var(--paper));
+  --wash: color-mix(in oklab, var(--ink) 6%, var(--paper));
+  --night: color-mix(in oklab, var(--ink) 15%, #05060b);
+  --on-night: color-mix(in oklab, var(--paper) 94%, var(--ink));
+
+  /* The same colours under shadcn/ui's names. */
+  --background: var(--paper);
+  --foreground: var(--text);
+  --card: var(--wash);
+  --card-foreground: var(--text);
+  --popover: var(--paper);
+  --popover-foreground: var(--text);
+  --primary: var(--ink);
+  --primary-foreground: var(--paper);
+  --secondary: var(--paper);
+  --secondary-foreground: var(--ink);
+  --muted: var(--wash);
+  --muted-foreground: var(--soft);
+  --accent: var(--wash);
+  --accent-foreground: var(--ink);
+  --destructive: var(--ink);
+  --border: var(--line);
+  --input: var(--ink);
+  --ring: var(--ink);
+  --radius: 2px;
+}
+
+/* State change: the ink reprints over 600 ms. */
+[data-state="calm"],
+[data-state="checking"],
+[data-state="alert"],
+[data-state="offline"] {
+  transition: --ink 600ms ease;
+}
+
+[data-state="offline"] .argos-fade {
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-state="calm"],
+  [data-state="checking"],
+  [data-state="alert"],
+  [data-state="offline"] {
+    transition: none;
+  }
+}
