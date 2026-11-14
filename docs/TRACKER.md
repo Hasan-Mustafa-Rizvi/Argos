@@ -1,6 +1,6 @@
 # Argos software tracker
 
-**Last updated:** Sat Nov 14 2026, 5:35 PM CT
+**Last updated:** Sat Nov 14 2026, 6:05 PM CT
 **Status:** Web A is reviewed and committed. Contract v0.3: the body is a Reachy Mini Lite. Brain A prompt is ready to run.
 
 Hasan owns all software. This file records where the software is. Coding agents never edit it.
@@ -12,7 +12,7 @@ Hasan owns all software. This file records where the software is. Coding agents 
 | M0 | Repo layout, ignore rules, agent rules, docs | root | Done | |
 | M1 | Contract v0.3 and scripted demo run | `contract/` | Done | |
 | W1 | Web shell: tokens, landing, sign-in, logo reveal, empty dashboard frame | `web/` | Done, reviewed, committed | |
-| W2 | Dashboard on replay data | `web/` | Done, reviewed, committed. Not yet deployed. | |
+| W2 | Dashboard on replay data | `web/` | Done, reviewed, committed. Polish pass committed (`67d8fea`). Not yet deployed. | |
 | M3 | Schema, access rules, second factor, live updates, live view channel | `supabase/` | Applied and tested. Three dashboard switches and the first account are Hasan's. | |
 | W3 | Dashboard reads live data, real sign-in with second factor, live view, keeps replay mode | `web/` | Not started | W2, M3 |
 | M5 | Brain: core, robot body language, then detection, voice and live view frames | `brain/` | Prompt ready | |
@@ -99,6 +99,18 @@ Not entering: FaZe Clan, Solana, Tiger Data, MongoDB Atlas, Vultr.
 - A manual override was mentioned by Hasan as a possible later addition. Not specified yet.
 
 ## Log
+
+### Sat Nov 14, 6:05 PM
+Reviewed the polish pass (Web A2). Verified from a clean copy: 65 of 65 tests, build passes,
+linter 0 errors and 2 warnings in the copied files. `web/src/data` and `web/src/auth` are
+byte-identical to the previous commit. Watched the reveal in a real browser, which the
+coding agent could not: the mark is readable throughout and it hands over quickly. Seen and
+left for a small follow-up: the team cards have no inner padding, and a leftover arrow sits
+at the top right of that section. Committed as `67d8fea`.
+
+Netlify: the connected team already holds a site named `argos-live-tracker`. The dashboard
+is not deployed. Best route is to import the GitHub repo in Netlify with base directory
+`web`, so every push deploys; the connector cannot link a repo.
 
 ### Sat Nov 14, 5:35 PM
 Reviewed Web A. Verified independently from a clean copy: 57 of 57 tests pass, the build
