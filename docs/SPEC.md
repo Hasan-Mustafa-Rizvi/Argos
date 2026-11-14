@@ -51,9 +51,10 @@ and what must stay true.
 | Question | Status |
 |---|---|
 | How does our code reach a FaceTime call through Chert? | Answered from their docs, Sat 4:45 PM. Chert bridges a FaceTime line into a LiveKit room. Our agent joins that room, hears the person and speaks. See the tracker log. |
-| Can our line place outbound calls, carry video out, and show our own picture to the person called? | Open. Each is switched on per line by Chert. Ask at their table. The hackathon starter covers inbound audio only. |
-| Which machine runs the Chert connector? | Open. It needs macOS or Linux with Node 22 or 24. The brain's laptop is Windows. |
-| Does Chert access last through Sunday afternoon? | Open. Lines are handed out by the organizers, one call at a time per line, possibly in time slots. Confirm our line and our slot for judging. |
+| Can our line place outbound calls, carry video out, and show our own picture to the person called? | Chert's challenge page says yes to all three for hackathon teams. To be proven on our own line. Calls go only to phones verified with the line. |
+| Which machine runs the Chert connector and the call agent? | A teammate's MacBook. Windows 11 is supported in beta. |
+| What is in the body now that it carries a Raspberry Pi 5? | Open. Is there still an ESP32, and what is wired to the Pi: camera, microphone, speaker, eyes, touch? The contract's serial link and the diagram above change once this is known. |
+| Does Chert access last through Sunday afternoon? | Yes if the trial starts after Sat 4 PM: it runs 48 hours. The limit that matters is 50 FaceTime minutes in total, 5 minutes a call. Ask Chert for more if testing eats them. |
 | Email provider | Open. Decided at the escalation milestone. |
 | What the body has: servos, camera, speaker | Open. Waiting on the components list in `progress.md`. |
 | Demo sessions are open to anyone with the link during the event | Accepted. A demo session plays the scripted run only and never receives live records or the live view. |

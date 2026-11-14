@@ -1,7 +1,7 @@
 # Argos software tracker
 
-**Last updated:** Sat Nov 14 2026, 4:45 PM CT
-**Status:** Web A is building. M3 is applied. Brain A prompt is written. Chert is understood; three answers are needed from their table.
+**Last updated:** Sat Nov 14 2026, 5:10 PM CT
+**Status:** Web A is building. M3 is applied. Brain A prompt is ready and now targets a Raspberry Pi 5. Track rules logged from Devpost and Discord.
 
 Hasan owns all software. This file records where the software is. Coding agents never edit it.
 
@@ -40,6 +40,8 @@ Hasan owns all software. This file records where the software is. Coding agents 
 | Sat 3:50 PM | **The centre of the dashboard is the live view from the dog's camera** | Hasan's call. The dashboard is only for signed-in people, so the feed is protected by sign-in and a second factor. |
 | Sat 3:50 PM | The live view is never stored, needs a second factor, goes to family accounts only, and is off unless switched on | Keeps the stored-image rule intact and keeps the family and clinician split consistent: clinicians already do not see images. |
 | Sat 3:50 PM | Demo sessions play the scripted run and never get live records or the live view | The demo buttons are public. Nothing real should be one tap away from a stranger. |
+| Sat 4:53 PM | The dog carries a Raspberry Pi 5 (team's call). The brain runs on it; the laptop is where it is developed and the fallback. | More power in the body, no tether, and the same code runs on both. |
+| Sat 4:53 PM | DeepSpace is left out. SpaceXSI, DEV post and a domain sit in a track check list for spare time. | Hasan's call. None of them may touch the core. |
 | Sat 4:05 PM | The web build is two prompts, not three: W1 and W2 in one run, then W3 | Neither W1 nor W2 needs a backend, and the coding agent has no usage limit. Review happens per stage inside one report. |
 | Sat 4:05 PM | Supabase gets only what security needs. Sign-ups are off; the one or two real accounts are created by hand. | Hasan's call. No one else can make an account, which removes most of the attack surface for the least work. |
 | Sat 3:50 PM | Frames travel as small JPEGs over a private Supabase broadcast channel, 4 a second | No extra service. Free plan allows 256 KB a message and 100 messages a second; a frame is under 100 KB. |
@@ -48,7 +50,26 @@ Hasan owns all software. This file records where the software is. Coding agents 
 
 ## Tracks this build serves
 
-General, Hardware, Chert (best use of FaceTime), ElevenLabs, MLH Gemini API, MLH SpaceXSI.
+Rules as published on Devpost and the sponsors' pages, read Sat 5:00 PM.
+
+| Track | What it requires | What we must do | Where it lives |
+|---|---|---|---|
+| General | Judged on robustness, theme, creativity | Submit | Everything |
+| Hardware | A Devpost section titled "Hardware Info" listing each part and what it did | Write the section from the final parts list | The dog's body |
+| Chert: Best Use of FaceTime | Built on Chert's FaceTime API. One iPhone on the team. The agent makes or takes a FaceTime call during the demo. Select the prize on Devpost. Judged live by Chert's CEO: fresh use of FaceTime video counts double, then wow factor, then usefulness. | A call agent that uses video, not just voice | M6 |
+| ElevenLabs | A Devpost section titled "How We Used ElevenLabs" listing each feature and how it was used. The brief asks for more than plain text-to-speech. | Use it for the spoken check and as the voice of the call agent, and say so | M5, M6 |
+| MLH Gemini API | Real API calls | The check on one frame, the summary, and what the call agent sees | M5, M6 |
+
+Not entering: FaZe Clan, Solana, Tiger Data, MongoDB Atlas, Vultr.
+
+## Track check: cheap extras, only if there is time
+
+| Extra | What it takes | Worth it? |
+|---|---|---|
+| MLH SpaceXSI raffle | Cursor as the main coding agent (true already), one Grok Bot automation in our workflow, both described on Devpost, and opting in. Needs an X Premium trial and the Grok Bot app. It is a raffle, not judged. | Low effort if a Grok Bot job can do something harmless, such as drafting the Devpost text from the repo. Do it Sunday morning or not at all. |
+| MLH DEV Writing Challenge | Publish a post about the project on DEV. Prize $100. | Yes if someone has an hour on Sunday. The Devpost text can be reused. |
+| MLH GoDaddy domain | Register a domain for the project through MLH's offer. | Only if a good name is free and it takes minutes. |
+| DeepSpace | Not a prize category. It is a sponsor offering build credits (expires Nov 25). | No prize to win. A separate family board built on it stays as an idea only. |
 
 ## Accounts
 
@@ -57,8 +78,8 @@ General, Hardware, Chert (best use of FaceTime), ElevenLabs, MLH Gemini API, MLH
 | GitHub, Netlify | M0, M2 | Ready |
 | Supabase | M3 | Ready. Project "Argos". New tables are not exposed to the API unless granted. |
 | Gemini (Google AI Studio) | M5 | To create |
-| ElevenLabs | M5 | To create |
-| Chert | M6 | Get our assigned FaceTime line, time slot and dispatch name from the organizers or the Chert table. |
+| ElevenLabs | M5 | To create. One free month of Creator through the coupon bot in the ElevenLabs Discord, using the HackUTA registration email. |
+| Chert | M6 | Start the free trial when we are ready to build M6, not before: it gives one line, 48 hours and 50 FaceTime minutes in total, with calls capped at 5 minutes. Needs an iPhone to verify. |
 | LiveKit Cloud | M6 | To create. Chert connects FaceTime to a LiveKit room that we own. |
 | Email sender | M6 | To choose |
 | Devpost | Sat midnight | To create |
@@ -75,6 +96,20 @@ General, Hardware, Chert (best use of FaceTime), ElevenLabs, MLH Gemini API, MLH
 - A manual override was mentioned by Hasan as a possible later addition. Not specified yet.
 
 ## Log
+
+### Sat Nov 14, 5:10 PM
+Track rules logged from Devpost, Discord and Chert's challenge page. Corrections to earlier
+notes: the hardware section is titled "Hardware Info"; SpaceXSI is a raffle that needs Cursor
+plus a Grok Bot automation, and is not DeepSpace; DeepSpace has no prize. Chert's own page
+settles most of what was open: teams get a free line for 48 hours with 50 minutes of
+FaceTime in total and calls of at most 5 minutes; the agent can see the caller's camera,
+send video back, and place calls; outbound calls and texts go only to phones that have
+verified with the line; Windows 11 is supported in beta with Node 24. The 50 minutes are the
+scarce thing: testing spends them.
+
+The team's hardware changed: the dog carries a Raspberry Pi 5. Brain A now targets the Pi,
+with the Windows laptop as the place it is developed and the fallback, one codebase. Not yet
+known: whether an ESP32 is still in the body, and what is wired to the Pi.
 
 ### Sat Nov 14, 4:45 PM
 Read Chert's FaceTime docs. How it works: Chert owns the FaceTime line and bridges each call
