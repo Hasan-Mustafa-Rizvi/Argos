@@ -126,7 +126,7 @@ For other inks, build the ramp the same way: mix ink into paper at 0, 12, 28, 46
 | Panel entering | Lines draw in, then the fill settles, as an etching | 400 ms |
 | Heartbeat | Meander steps one unit | 300 ms |
 | New timeline row | Slides down 8 px and fades in | 250 ms |
-| Sign-in to dashboard | The glass logo reveal, once per session, skippable. Gentle: the mark is readable in every frame. | About 1.5 s |
+| Sign-in to dashboard | The glass logo reveal, once per session, skippable. Gentle: the mark is readable from the moment the glass lands. | About 1.5 s |
 
 Under `prefers-reduced-motion` nothing moves. States still change colour, instantly.
 
@@ -161,13 +161,16 @@ Minimum size 32 px. Clear space of a quarter of its width on every side. Never o
 ### Landing, `/`
 
 The Cobalt Toile landing template, printed in cobalt, with Argos's words. It already is the
-identity. Change the copy, not the drawing.
+identity. Change the copy, not the drawing, with two exceptions: the short rule in front of
+each section label is removed, and the team is shown as plain cards.
 
 - Palette switcher off. Newsletter block removed: there is nothing to subscribe to.
 - Nothing invented. No fake articles, clients, statistics, contact details or testimonials
   anywhere. The page says what is planned now, and its words are updated when plans change.
-- **Who made this.** The template's press list becomes the team: Hasan, Neel and Farrell,
-  with design, interface polish and organization credited to Hasan.
+- **Who made this.** Three plain cards in the site's own plate style, in place of the
+  template's press list: Hasan, Neel and Farrell, with design, interface polish and
+  organization credited to Hasan.
+- **No dashes.** No em dash or en dash reaches the screen anywhere on the site.
 - **Credit in the footer.** One line names the landing template and its author and links to
   the full credits.
 - The four bookmarks become the four things Argos does: watches, checks, stands down,
