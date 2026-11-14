@@ -1,7 +1,7 @@
 # Argos software tracker
 
-**Last updated:** Sat Nov 14 2026, 3:50 PM CT
-**Status:** Contract v0.2 adds the live view. New logo traced. W1 is ready to hand to a coding agent.
+**Last updated:** Sat Nov 14 2026, 4:05 PM CT
+**Status:** W1 and W2 go to the coding agent as one prompt. Supabase project exists; M3 can start.
 
 Hasan owns all software. This file records where the software is. Coding agents never edit it.
 
@@ -11,9 +11,9 @@ Hasan owns all software. This file records where the software is. Coding agents 
 |---|---|---|---|---|
 | M0 | Repo layout, ignore rules, agent rules, docs | root | Done | |
 | M1 | Contract v0.2 and scripted demo run | `contract/` | Done | |
-| W1 | Web shell: tokens, landing, sign-in, logo reveal, empty dashboard frame | `web/` | Ready to start | |
-| W2 | Dashboard on replay data | `web/` | Not started | W1 |
-| M3 | Schema, access rules, second factor, live updates, live view channel | `supabase/` | Not started | Supabase project |
+| W1 | Web shell: tokens, landing, sign-in, logo reveal, empty dashboard frame | `web/` | Ready to start, one prompt with W2 | |
+| W2 | Dashboard on replay data | `web/` | Ready to start, one prompt with W1 | |
+| M3 | Schema, access rules, second factor, live updates, live view channel | `supabase/` | Ready to start | |
 | W3 | Dashboard reads live data, real sign-in with second factor, live view, keeps replay mode | `web/` | Not started | W2, M3 |
 | M5 | Brain: simulator first, then real detection, voice and live view frames | `brain/` | Not started | M3 for writes |
 | M6 | Escalation: FaceTime call and email, dry-run by default | `brain/` | Not started | Chert answers |
@@ -40,6 +40,8 @@ Hasan owns all software. This file records where the software is. Coding agents 
 | Sat 3:50 PM | **The centre of the dashboard is the live view from the dog's camera** | Hasan's call. The dashboard is only for signed-in people, so the feed is protected by sign-in and a second factor. |
 | Sat 3:50 PM | The live view is never stored, needs a second factor, goes to family accounts only, and is off unless switched on | Keeps the stored-image rule intact and keeps the family and clinician split consistent: clinicians already do not see images. |
 | Sat 3:50 PM | Demo sessions play the scripted run and never get live records or the live view | The demo buttons are public. Nothing real should be one tap away from a stranger. |
+| Sat 4:05 PM | The web build is two prompts, not three: W1 and W2 in one run, then W3 | Neither W1 nor W2 needs a backend, and the coding agent has no usage limit. Review happens per stage inside one report. |
+| Sat 4:05 PM | Supabase gets only what security needs. Sign-ups are off; the one or two real accounts are created by hand. | Hasan's call. No one else can make an account, which removes most of the attack surface for the least work. |
 | Sat 3:50 PM | Frames travel as small JPEGs over a private Supabase broadcast channel, 4 a second | No extra service. Free plan allows 256 KB a message and 100 messages a second; a frame is under 100 KB. |
 | Sat 3:30 PM | Reference source files stay on Hasan's machine, out of the repo | They are other people's work. The index and credits are in the repo. |
 | Sat 3:30 PM | Kimi dropped from the plan | Hasan's call. Cursor and Claude Code are the coding agents. |
@@ -53,7 +55,7 @@ General, Hardware, Chert (best use of FaceTime), ElevenLabs, MLH Gemini API, MLH
 | Account | Needed by | State |
 |---|---|---|
 | GitHub, Netlify | M0, M2 | Ready |
-| Supabase | M3 | To create |
+| Supabase | M3 | Ready. Project "Argos". New tables are not exposed to the API unless granted. |
 | Gemini (Google AI Studio) | M5 | To create |
 | ElevenLabs | M5 | To create |
 | Chert | M6 | To create. Confirm access lasts through Sunday afternoon first. |
@@ -72,6 +74,15 @@ General, Hardware, Chert (best use of FaceTime), ElevenLabs, MLH Gemini API, MLH
 - A manual override was mentioned by Hasan as a possible later addition. Not specified yet.
 
 ## Log
+
+### Sat Nov 14, 4:05 PM
+Web work regrouped into two prompts: W1 and W2 together (the whole site on demo data), then
+W3 (live data, sign-in, second factor, live view). Fixed a contradiction found while writing
+the prompt: the dashboard sketch showed stillness and room temperature to family, but the
+contract gives sensor readings to clinicians only. Family now gets Last check and Today in
+those places. Supabase scope agreed as the minimum that is safe: access rules on every table,
+second factor enforced in the rules, private live channel, private snapshot storage, sign-ups
+off. No extras.
 
 ### Sat Nov 14, 3:50 PM
 Hasan's logo traced to SVG: emblem, a heavier cut for small sizes, a side-by-side lockup and a

@@ -94,7 +94,9 @@ poor venue network and needs no extra service.
 
 ## Work packages
 
-Each one is a single prompt to a coding agent and leaves the site working.
+Each one leaves the site working. W1 and W2 are handed to the coding agent as one prompt in
+two stages, since neither needs a backend. W3 is a second prompt, once the Supabase schema
+exists.
 
 ### W1. Shell, landing, sign-in, reveal
 

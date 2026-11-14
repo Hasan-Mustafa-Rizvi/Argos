@@ -201,16 +201,20 @@ page.
 │ Calm          │                                      │ 3:41 Argos asked:     │
 │ since 3:12 PM │          ARGOS'S VIEW                │      Are you okay?    │
 ├───────────────┤          (night panel, dither)       │ 3:41 Argos heard a    │
-│ STILLNESS     │                                      │      call for help.   │
+│ STILLNESS *   │                                      │      call for help.   │
 │ ▮▮▮▮▯▯▯▯▯▯▯▯  │                                      │ 3:12 Argos is online. │
 ├───────────────┤  [ Acknowledge ]  only during alert  │                       │
-│ ROOM  23.4 °C │                                      │                       │
+│ ROOM * 23.4°C │                                      │                       │
 ├───────────────┴──────────────────────────────────────┴───────────────────────┤
 │ INCIDENTS  (ledger rows that open)          │ SENSOR HISTORY (clinician only)│
 ├──────────────────────────────────────────────────────────────────────────────┤
 │ ridgeline strip, cobalt dither                                               │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
+
+`*` Clinician only. Family does not receive sensor readings (contract section 4), so in those
+two places family sees **Last check** (the most recent incident and how it ended) and
+**Today** (checks counted by how they ended).
 
 - **State plate.** The state word, since when, and when Argos last reported.
 - **Argos's view.** The only dark panel, and the live view from the dog's camera for a
