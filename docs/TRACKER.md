@@ -1,7 +1,7 @@
 # Argos software tracker
 
-**Last updated:** Sat Nov 14 2026, 8:15 PM CT
-**Status:** The dashboard signs in for real and reads live records. The brain is built and reviewed but untried on real hardware. The Chert trial is running and a phone is verified. The dashboard is live on real accounts. The brain runs on the real robot and the whole chain has run in dry-run. Next: one real call in the morning, the Devpost text and the pitch. The wheels wait on the hardware team's answers.
+**Last updated:** Sun Nov 15 2026, 5:20 AM CT
+**Status:** The dashboard is live on real accounts. The brain runs on the real robot, and the whole chain from a fall to the call agent has run in dry-run. Next: one real text and FaceTime call in the morning, clearing the test data, the Devpost text and the pitch. The wheels are built in software and wait on wiring and the printed base.
 
 Hasan owns all software. This file records where the software is. Coding agents never edit it.
 
@@ -14,10 +14,10 @@ Hasan owns all software. This file records where the software is. Coding agents 
 | W1 | Web shell: tokens, landing, sign-in, logo reveal, empty dashboard frame | `web/` | Done, reviewed, committed | |
 | W2 | Dashboard on replay data | `web/` | Done, reviewed, committed, deployed. | |
 | M3 | Schema, access rules, second factor, live updates, live view channel | `supabase/` | Applied and tested. Three dashboard switches and the first account are Hasan's. | |
-| W3 | Dashboard reads live data, real sign-in with second factor, live view, keeps replay mode | `web/` | Built and reviewed. Proven on the real backend: sign-in, authenticator setup, live records, the acknowledge write. The live picture and the snapshot are unseen until the brain runs with a camera. | |
-| M5 | Brain: core, robot body language, then detection, voice and live view frames | `brain/` | Built, reviewed, committed. Nothing tried on real hardware or with real keys yet. | The robot, the Pi, keys |
+| W3 | Dashboard reads live data, real sign-in with second factor, live view, keeps replay mode | `web/` | Built and reviewed. Proven on the real backend: sign-in, authenticator setup, live records, the acknowledge write. The live picture and the stored snapshot have been seen with the robot's camera. The live picture's flicker is fixed (Web C). | |
+| M5 | Brain: core, robot body language, then detection, voice and live view frames | `brain/` | Built, reviewed, committed. Run on the real robot with real keys; see the log for 5:00 AM. | |
 | M6 | Escalation: an iMessage, then the FaceTime video call agent (Chert, LiveKit, ElevenLabs voice, Gemini on what it sees). Queue and retry on a busy line. The backup email only if there is time. | `call/` | Built and reviewed. Three real FaceTime calls placed and answered; "I'm on my way" was heard and acknowledged. Not yet run against the real backend with the brain. | The contact's phone must text the line first |
-| M8 | The brain drives the wheels: a short approach to the person during a check. Also the head press as a pat. | `brain/` | Not started | The hardware team's answers; the wheels being printed |
+| M8 | The brain drives the wheels: a short approach to the person during a check. Also the head press as a pat. | `brain/` | Built and reviewed. The head press is proven on the robot (15 of 15). The wheels have never run. | Wiring to the contract's six pins, a way to cut the motor battery, the printed base |
 | M7 | Firmware | none | Dropped. There is no ESP32 in the robot. | |
 
 ## Decisions
@@ -97,24 +97,25 @@ Not entering: FaZe Clan, Solana, Tiger Data, MongoDB Atlas, Vultr.
 ## Open items
 
 With Hasan:
-- Chert: read the trial's end time off the billing page. Watch the Chert Discord for the answer on busy shared lines during judging. Keep the join code private.
-- Sunday morning: run onboarding again if the line was released, then the friend sends one text to the line's number.
+- Sunday morning: the contact's phone sends one text to the line's number, then one real run with a real text and FaceTime call, recorded as the backup. The trial ends about Mon 7:45 PM; about 47 call minutes are left.
+- Clear the test data after the last test and before judging: the records, and the `incidents` folder in the `snapshots` storage bucket.
 - Gemini key: paid tier, or change the privacy wording.
-- Claim the ElevenLabs coupon; create the Gemini and LiveKit accounts.
-- Create the Devpost page before Saturday midnight. What that first submission must contain is unconfirmed.
+- Devpost: paste the final text, set the project link to the domain, tick the prizes. Decide who does what in the pitch and say it twice with the robot.
+- Delete the stray `web/vite.config.js`. Turn auto-renew off on the domain.
+- Keep the Chert join code and the contact's number private.
 
 With Neel and Farrell:
-- The twelve hardware questions sent Sat 6:49 PM.
+- Wheels: confirm the six wires match the contract (17, 27, 22, 23, ENA 12, ENB 13, jumpers off, common ground) and that the motor battery can be cut fast. Then a lifted wheel test, then one approach.
 - What the landing page should say each of them did. It says "Hardware and the dog's body" for both.
 
 ## Known limits
 
 - The robot's microphones are dead and its audio board drops off USB when the head is pressed or moves. The brain rides through it. No spoken answer and no call-for-help trigger without a USB microphone.
 - The wheels have never run. The stillness trigger is untried on the robot.
-- The dashboard's control for the original picture flickers while live frames arrive.
-- The dashboard's live picture and stored snapshot have never been seen with a real camera. Everything else on it has been seen against the real backend.
+- The live picture fix (Web C) was checked in a browser with made-up frames at 8 a second, not yet with the robot's camera. No phone or slow device has been tried; if decoding a frame ever took longer than the gap between frames, the engraving would stop updating.
+- A run of frames that cannot be decoded still counts as a picture arriving, so the view stays marked live on the last good picture and never says how long it has been.
 - The live view over the venue network is untested.
-- The call agent has not run against the real backend with the brain: the acknowledgement reaching the database, the dashboard clearing and the dog calming are proven only on fakes.
+- The call agent has run against the real backend with the brain only in dry-run. A real text and call, the acknowledgement it writes reaching the database, the dashboard clearing and the dog calming are proven only on fakes.
 - Argos's text before the call is refused until the contact's phone has texted the line. It must do so within 24 hours before the demo.
 - Questions and answers on a real FaceTime call are unproven; they worked in a browser room.
 - Whether a phone that joined by the join code can receive a call from the agent, not only place one, is unconfirmed.
@@ -122,6 +123,18 @@ With Neel and Farrell:
 - A manual override was mentioned by Hasan as a possible later addition. Not specified.
 
 ## Log
+
+### Sun Nov 15, 5:20 AM
+Web C: the live picture no longer flickers. Every new frame was treated as a new picture,
+so the choice of original or engraving reset and the canvas hid 4 to 8 times a second. Two
+more faults came out with it: a print that finished late could draw over a newer frame, and
+one unreadable frame removed the whole picture. All three are fixed, in two components.
+Reviewed from a clean copy: 101 tests pass in 20 files (8 new; 5 of them fail on the old
+code), the type check is clean, lint shows the same 2 warnings as before, the build
+succeeds. Who can see the live view is unchanged, and still only one frame is held.
+
+The Devpost text and the pitch are drafted in a doc outside the repo. The domain
+argos-is-furreal.health serves the dashboard.
 
 ### Sun Nov 15, 5:00 AM
 First run on the real robot, from Hasan's laptop over SSH to the Pi (a Pi 5 on Debian 13).

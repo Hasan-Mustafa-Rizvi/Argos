@@ -16,7 +16,10 @@ function jpegBlob(jpeg: string): Blob | null {
   }
 }
 
-/** One frame, held only as this blob. A bad encoding draws nothing. */
+/**
+ * One frame, held only as this blob. A frame with a bad encoding is skipped: the last good one
+ * stays, replaced by the next good one. With no good frame yet, nothing is drawn.
+ */
 export function LiveFrame({
   frame,
   ink,
@@ -28,14 +31,21 @@ export function LiveFrame({
   live: boolean
   stoppedFor: number | null
 }) {
-  const blob = React.useMemo(() => jpegBlob(frame.jpeg), [frame])
-  if (!blob) return null
+  const [held, setHeld] = React.useState(() => ({ frame, good: readable(frame) }))
+  if (held.frame !== frame) setHeld({ frame, good: readable(frame) ?? held.good })
+  if (!held.good) return null
   return (
     <PrintedPicture
-      blob={blob}
+      blob={held.good.blob}
       ink={ink}
       surface="night"
-      meta={{ at: frame.at, live, stoppedFor }}
+      meta={{ at: held.good.at, live, stoppedFor }}
+      stream
     />
   )
+}
+
+function readable(frame: ShownFrame): { at: string; blob: Blob } | null {
+  const blob = jpegBlob(frame.jpeg)
+  return blob ? { at: frame.at, blob } : null
 }
