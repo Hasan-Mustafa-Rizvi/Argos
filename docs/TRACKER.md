@@ -1,7 +1,7 @@
 # Argos software tracker
 
 **Last updated:** Sat Nov 14 2026, 8:15 PM CT
-**Status:** The dashboard signs in for real and reads live records. The brain is built and reviewed but untried on real hardware. The Chert trial is running and a phone is verified. The dashboard is live on real accounts. Next: the FaceTime call agent (M6), then the first run of the brain on the robot. The wheels wait on the hardware team's answers.
+**Status:** The dashboard signs in for real and reads live records. The brain is built and reviewed but untried on real hardware. The Chert trial is running and a phone is verified. The dashboard is live on real accounts. The call agent places real FaceTime calls. Next: the whole path end to end, and the first run of the brain on the robot. The wheels wait on the hardware team's answers.
 
 Hasan owns all software. This file records where the software is. Coding agents never edit it.
 
@@ -16,7 +16,7 @@ Hasan owns all software. This file records where the software is. Coding agents 
 | M3 | Schema, access rules, second factor, live updates, live view channel | `supabase/` | Applied and tested. Three dashboard switches and the first account are Hasan's. | |
 | W3 | Dashboard reads live data, real sign-in with second factor, live view, keeps replay mode | `web/` | Built and reviewed. Proven on the real backend: sign-in, authenticator setup, live records, the acknowledge write. The live picture and the snapshot are unseen until the brain runs with a camera. | |
 | M5 | Brain: core, robot body language, then detection, voice and live view frames | `brain/` | Built, reviewed, committed. Nothing tried on real hardware or with real keys yet. | The robot, the Pi, keys |
-| M6 | Escalation: an iMessage, then the FaceTime video call agent (Chert, LiveKit, ElevenLabs voice, Gemini on what it sees). Queue and retry on a busy line. The backup email only if there is time. | its own lane | Next. Prompt to write. | A LiveKit account |
+| M6 | Escalation: an iMessage, then the FaceTime video call agent (Chert, LiveKit, ElevenLabs voice, Gemini on what it sees). Queue and retry on a busy line. The backup email only if there is time. | `call/` | Built and reviewed. Three real FaceTime calls placed and answered; "I'm on my way" was heard and acknowledged. Not yet run against the real backend with the brain. | The contact's phone must text the line first |
 | M8 | The brain drives the wheels: a short approach to the person during a check. Also the head press as a pat. | `brain/` | Not started | The hardware team's answers; the wheels being printed |
 | M7 | Firmware | none | Dropped. There is no ESP32 in the robot. | |
 
@@ -113,12 +113,33 @@ With Neel and Farrell:
 - The pat the brain senses today is a press on an antenna, not on the head.
 - The dashboard's live picture and stored snapshot have never been seen with a real camera. Everything else on it has been seen against the real backend.
 - The live view over the venue network is untested.
-- The Chert sign-up tool ran on Windows with Node 24. The connector that carries a call is still untested on Windows and on WSL2, and no FaceTime call has been placed yet: the demo call never got through a busy line.
+- The call agent has not run against the real backend with the brain: the acknowledgement reaching the database, the dashboard clearing and the dog calming are proven only on fakes.
+- Argos's text before the call is refused until the contact's phone has texted the line. It must do so within 24 hours before the demo.
+- Questions and answers on a real FaceTime call are unproven; they worked in a browser room.
 - Whether a phone that joined by the join code can receive a call from the agent, not only place one, is unconfirmed.
 - Demo sessions are open to anyone with the link. They see the scripted run only.
 - A manual override was mentioned by Hasan as a possible later addition. Not specified.
 
 ## Log
+
+### Sun Nov 15, 12:30 AM
+The call agent is built (Claude Code, `call/`), rebuilt from a clean copy and reviewed: 83
+tests pass, lint clean, no key or number in the code. It is a plain Python program in our
+own LiveKit room; it runs natively on Windows. On the real line it placed three calls to
+the verified iPhone. The last was a full rehearsal on a made-up alert: answered in 15
+seconds, bridge ready 4 seconds later, Argos spoke, heard "I'm on my way", acknowledged as
+"Son, by FaceTime" (in memory), said goodbye and hung up. 168 seconds used, about 47 of 50
+minutes left. The text before the call was refused each time: on the trial Chert only lets
+the agent text a phone that has texted the line in the last 24 hours. The step that looks
+at the person's camera was left out on purpose: the captured picture can include our own
+video. Not yet proven: questions asked over FaceTime, and the real path through the
+database with the brain running.
+
+Hardware answers in: TT gear motors through an L298N, four fixed wheels, tank steering, 100
+mm wheels, a 12 V pack of eight AAA cells, no encoders, no off switch. The Pi runs Raspberry
+Pi OS with SSH. Contract 0.6 fixes the wiring and the rules for moving. The Brain B prompt
+was reviewed (the review found a crashed brain could leave the motors running) and is being
+built on Hasan's machine against fakes; Neel does the hardware run after.
 
 ### Sat Nov 14, 9:20 PM
 Web B built by Cursor, rebuilt from a clean copy and reviewed: 93 tests, build and type

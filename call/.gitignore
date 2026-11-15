@@ -1,0 +1,15 @@
+# Settings with real values
+.env
+.env.*
+!.env.example
+
+# The handled list and the seconds file, and the downloaded speech model
+var/
+models/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/

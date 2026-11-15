@@ -1,0 +1,10 @@
+# The call agent. Python 3.12. Every package installs from a ready-made wheel on Windows x86_64.
+livekit==1.2.1            # LiveKit's real-time SDK: our participant, its audio and video tracks
+livekit-api==1.2.2        # create and delete the room, mint tokens
+livekit-protocol==1.1.32  # held below 2.0.0, which came out the night this was written
+httpx==0.28.1             # Chert, Supabase and ElevenLabs, over plain HTTP
+python-dotenv==1.2.4      # reads call/.env.local
+pillow==13.0.0            # the picture on the agent's video
+google-genai==3.3.0       # Gemini, to hear and answer questions
+websockets==17.4          # the live view, over Supabase Realtime
+vosk==0.3.45              # the offline phrase list ("I'm on my way" with no Gemini key)
