@@ -3,7 +3,7 @@
 A companion robot dog that keeps watch over someone who is recovering, elderly, or needs
 looking after, and sends word when something is wrong.
 
-The dashboard is live at https://argos-watch.netlify.app.
+The dashboard is live at https://argos-is-furreal.health.
 
 Built at HackUTA 2026. The theme is Homer's Odyssey. Argos is the dog who kept watch for
 twenty years and was the first to recognize Odysseus when he came home.

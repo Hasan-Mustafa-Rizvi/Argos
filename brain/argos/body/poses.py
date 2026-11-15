@@ -111,6 +111,12 @@ def checking(look_yaw_deg: float | None) -> Pose:
     return replace(CHECKING, yaw=look_yaw_deg or 0.0)
 
 
+# During an approach of the wheels: level and straight ahead, held, so that where the person
+# is in the picture is where they are from the base.
+APPROACH = replace(CHECKING, pitch=0.0, yaw=0.0)
+APPROACH_MOVE_S = 0.8
+
+
 # ---------------------------------------------------------------- alert
 
 # Head up, antennas sweeping wide and back, again and again. Big enough to read across a
@@ -135,8 +141,12 @@ STOOD_DOWN = (
 # ---------------------------------------------------------------- the antenna as a pat
 
 # A press or a pull moves an antenna away from where the motor is holding it. Read as a pat
-# only while the robot holds still in `checking`.
+# only while the robot holds still in `checking`. The head press is in press.py; its
+# thresholds are settings.
 ANTENNA_PAT_RAD = 0.35
 ANTENNA_PAT_HOLD_S = 0.15
 ANTENNA_PAT_COOLDOWN_S = 1.5
-SETTLE_S = 0.3
+
+# No pat at all during a move of the head or of the wheels, or for this long after (rule 3:
+# the brain's own movement is never read as a press).
+PAT_QUIET_S = 0.5

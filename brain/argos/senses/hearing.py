@@ -11,7 +11,8 @@ model. In a loud hall it will often miss; the pat and the keyboard cover that.
   "help" or "I'm not okay" are recorded as heard and change nothing.
 - Nothing is heard while Argos speaks: the voice marks the time it is talking, and audio
   from that time is thrown away with the recogniser's state, so Argos never hears its own
-  question.
+  question. The same while the wheels run and for half a second after: they mark it on a
+  field of their own (`motors_until`), so neither can cut the other's quiet short.
 - Only the matched phrase is ever passed on. Unknown speech is dropped without a trace.
 """
 
@@ -201,8 +202,9 @@ class Listener:
         self._thread: threading.Thread | None = None
 
     def muted(self) -> bool:
-        return self.gate.mode == "off" or self.clock.now() < getattr(self.gate,
-                                                                     "speaking_until", 0.0)
+        now = self.clock.now()
+        return (self.gate.mode == "off" or now < getattr(self.gate, "speaking_until", 0.0)
+                or now < getattr(self.gate, "motors_until", 0.0))
 
     def feed(self, pcm: bytes) -> None:
         """One chunk of audio. Public so tests can drive it."""

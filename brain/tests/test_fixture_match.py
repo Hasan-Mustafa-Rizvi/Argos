@@ -27,6 +27,18 @@ class StillFrames:
         return "FAKE-FRAME"
 
 
+class SpeakingVoice:
+    """A voice that speaks every line at once. The fixture's `asked` has no "spoken": false,
+    and since contract 0.4 a run with no voice records one, so the scripted rig has a voice."""
+
+    def say(self, key: str, on_done: Any = None, on_spoken: Any = None) -> str:
+        if on_spoken is not None:
+            on_spoken(True)
+        if on_done is not None:
+            on_done()
+        return key
+
+
 def fixture() -> list[dict[str, Any]]:
     with FIXTURE.open(encoding="utf-8") as handle:
         return [json.loads(line) for line in handle if line.strip()]
@@ -35,7 +47,8 @@ def fixture() -> list[dict[str, Any]]:
 @pytest.fixture(scope="module")
 def scripted() -> Rig:
     steps, length = script.from_fixture(FIXTURE)
-    rig = make_rig(script=ScriptPlayer(steps, length), frames=StillFrames())
+    rig = make_rig(script=ScriptPlayer(steps, length), frames=StillFrames(),
+                   voice=SpeakingVoice())
 
     def upload(incident_id: str, frame: object) -> str:
         path = f"incidents/{incident_id}/snapshot.jpg"

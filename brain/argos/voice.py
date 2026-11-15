@@ -40,6 +40,14 @@ class TextToSpeech(Protocol):
     def synthesize(self, line: str) -> bytes: ...
 
 
+class VoiceRefused(RuntimeError):
+    """ElevenLabs answered with an error status."""
+
+    def __init__(self, status: int) -> None:
+        super().__init__(f"ElevenLabs answered HTTP {status}")
+        self.status = status
+
+
 class ElevenLabs:
     """POST /v1/text-to-speech/{voice_id}?output_format=pcm_16000 with the `xi-api-key`
     header. Plain HTTP: one request, no SDK that reads the key at import time."""
@@ -60,7 +68,7 @@ class ElevenLabs:
             json={"text": line, "model_id": self.model},
         )
         if response.status_code != 200:
-            raise RuntimeError(f"ElevenLabs answered HTTP {response.status_code}")
+            raise VoiceRefused(response.status_code)
         if len(response.content) < 2:
             raise RuntimeError("ElevenLabs sent no audio")
         return response.content
@@ -103,7 +111,8 @@ class Voice:
         self.beep = beep
         self.threaded = threaded
         self._memory: dict[str, bytes] = {}
-        self._jobs: queue.Queue[tuple[str, Callable[[], None] | None]] = queue.Queue()
+        self._jobs: queue.Queue[tuple[str, Callable[[], None] | None,
+                                      Callable[[bool], None] | None]] = queue.Queue()
         self._warned: set[str] = set()
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
@@ -116,6 +125,10 @@ class Voice:
     def _path(self, line: str) -> Path:
         digest = hashlib.sha256(f"{self.cache_key}|{FORMAT}|{line}".encode()).hexdigest()[:24]
         return self.cache_dir / f"{digest}.pcm"
+
+    def cache_path(self, key: str) -> Path:
+        """Where the line `key` is kept on disk once fetched."""
+        return self._path(LINES[key])
 
     def audio(self, key: str) -> bytes | None:
         """The line's audio: from memory, from the disk cache, or fetched once and cached."""
@@ -145,20 +158,24 @@ class Voice:
     def prefetch(self) -> None:
         """Fetch every line now, on the voice thread, so the first check speaks at once."""
         for key in LINES:
-            self._jobs.put((f"fetch:{key}", None))
+            self._jobs.put((f"fetch:{key}", None, None))
 
     # ------------------------------------------------------------------ speaking
 
-    def say(self, key: str, on_done: Callable[[], None] | None = None) -> str:
-        """Queue a line. `on_done` runs after it has been spoken (or skipped). Returns the
-        line's text, which is what goes into the `asked` event."""
+    def say(self, key: str, on_done: Callable[[], None] | None = None,
+            on_spoken: Callable[[bool], None] | None = None) -> str:
+        """Queue a line. `on_spoken` is told whether it was really spoken (False when there
+        was no audio or no speaker and a beep went out instead, or nothing), then `on_done`
+        runs. Returns the line's text, which is what goes into the `asked` event."""
         if self.threaded:
-            self._jobs.put((key, on_done))
+            self._jobs.put((key, on_done, on_spoken))
         else:
-            self._speak(key, on_done)
+            self._speak(key, on_done, on_spoken)
         return LINES[key]
 
-    def _speak(self, key: str, on_done: Callable[[], None] | None) -> None:
+    def _speak(self, key: str, on_done: Callable[[], None] | None,
+               on_spoken: Callable[[bool], None] | None = None) -> None:
+        spoken = False
         try:
             pcm = self.audio(key)
             if pcm and self.speaker is not None:
@@ -167,6 +184,7 @@ class Voice:
                     self.gate.speaking_until = self.clock.now() + seconds + TAIL_S + 1.0
                 try:
                     self.speaker.play(pcm, RATE)
+                    spoken = True
                 except Exception as exc:
                     self._warn("speaker", f"speaker failed ({exc})")
                     self.beep(300)
@@ -178,6 +196,8 @@ class Voice:
                 self._warn(f"silent-{key}", f"cannot speak {LINES[key]!r}: {why}")
                 self.beep(300)
         finally:
+            if on_spoken is not None:
+                on_spoken(spoken)
             if on_done is not None:
                 on_done()
 
@@ -189,13 +209,13 @@ class Voice:
     def _run(self) -> None:
         while not self._stop.is_set():
             try:
-                key, on_done = self._jobs.get(timeout=0.5)
+                key, on_done, on_spoken = self._jobs.get(timeout=0.5)
             except queue.Empty:
                 continue
             if key.startswith("fetch:"):
                 self.audio(key.removeprefix("fetch:"))
                 continue
-            self._speak(key, on_done)
+            self._speak(key, on_done, on_spoken)
 
     def stop(self) -> None:
         self._stop.set()

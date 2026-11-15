@@ -1,8 +1,11 @@
-"""Escalation: telling family. One interface, two implementations.
+"""Escalation: telling family. One interface, three implementations.
 
 - `DryRunEscalator` records what would be sent, with `"dry_run": true`, and sends nothing.
-- `RealSender` is a stub that raises. Real calls and email come in a later task and plug in
-  here, behind the same `escalate()` call.
+- `CallAgentEscalator`, with `ARGOS_CALL_AGENT=1`: the call agent (`call/`) learns of the
+  escalation from the backend, places the call and writes the `call_placed`,
+  `call_answered`, `call_failed` and `message_sent` events itself (contract section 3). The
+  brain then writes none of those, nor `email_sent`, and places nothing.
+- `RealSender` is a stub that raises. Real sending from the brain is not built.
 
 Nothing real leaves by default: `ARGOS_DRY_RUN` missing, `1` or anything else means dry-run.
 `ARGOS_DRY_RUN=0` is the only value that asks for real sending, and in this build it is
@@ -59,6 +62,21 @@ class DryRunEscalator:
         )
 
 
+CALL_EVENTS = ("call_placed", "call_answered", "call_failed", "message_sent", "email_sent")
+
+
+class CallAgentEscalator:
+    """The call agent places the call and records it. The brain records nothing here."""
+
+    dry_run = True  # the brain itself never sends anything
+
+    def __init__(self, recorder: Recorder) -> None:
+        self.recorder = recorder
+
+    def escalate(self, incident_id: str) -> None:
+        log.info("escalated: the call agent places the call and records it (ARGOS_CALL_AGENT=1)")
+
+
 class RealSender:
     """Placeholder for the real FaceTime call and email. Not built in this task."""
 
@@ -76,8 +94,10 @@ def make_escalator(
     recorder: Recorder,
     real_sender: Callable[..., Escalator] = RealSender,
 ) -> Escalator:
-    """Always the dry-run in this build. `real_sender` is never called; it is a parameter so a
-    test can prove that."""
+    """The call agent's, with ARGOS_CALL_AGENT=1; otherwise always the dry-run in this build.
+    `real_sender` is never called; it is a parameter so a test can prove that."""
+    if settings.call_agent:
+        return CallAgentEscalator(recorder)
     if settings.dry_run_off_requested:
         log.warning(NOT_BUILT)
         recorder.note(NOT_BUILT)

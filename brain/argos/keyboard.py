@@ -8,6 +8,11 @@ own thread, so it never waits on the camera or audio threads, and they never wai
   Enter, Ctrl+C still works) and restored on exit.
 - No terminal (a service started at boot, or input piped in): lines are read, and the first
   character of each line is the key. At end of input the keyboard simply stops.
+
+The stop key (space, or x) stops the wheels. The brain hands it to the wheels directly, on
+this thread, never through its queue, and it holds until the brain is started again. The
+wheels arm only when a real terminal is attached (`attached()`), so the stop key is always
+at hand when they can move.
 """
 
 from __future__ import annotations
@@ -29,13 +34,27 @@ KEYS = {
     "y": "answer \"I'm fine\"",
     "p": "pat",
     "a": "acknowledge the alert (recorded as Demo)",
+    " ": "stop the wheels until restart",
+    "x": "stop the wheels until restart",
     "q": "quit",
     "?": "show these keys",
 }
 
 
 def help_text() -> str:
-    return "Keys:  " + "   ".join(f"{key} {meaning}" for key, meaning in KEYS.items())
+    shown = {key: meaning for key, meaning in KEYS.items() if key != "x"}
+    names = {" ": "space or x"}
+    return "Keys:  " + "   ".join(f"{names.get(key, key)} {meaning}"
+                                  for key, meaning in shown.items())
+
+
+def attached(stream: TextIO | None = None) -> bool:
+    """A person's keyboard, in a real terminal: not a service, not piped input."""
+    stream = stream or sys.stdin
+    try:
+        return stream is not None and stream.isatty()
+    except (AttributeError, ValueError, OSError):
+        return False
 
 
 class Keyboard:

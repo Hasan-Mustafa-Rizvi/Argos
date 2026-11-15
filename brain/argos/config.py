@@ -3,6 +3,9 @@
 Only the names in the root `.env.example` and in `brain/.env.example` are read. Contact
 details (`CONTACT_FACETIME_TO`, `CONTACT_EMAIL_TO`) are never read by this program: real
 sending is not built, and a value that is never read cannot leak.
+
+A value that cannot be used is reported by name only, never with what it holds: a key pasted
+into the wrong line must not reach a log.
 """
 
 from __future__ import annotations
@@ -13,10 +16,12 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from argos import DEVICE_ID
+from argos.body.guard import LOWEST_POWER, MAX_POWER
 
 log = logging.getLogger("argos.config")
 
 BRAIN_DIR = Path(__file__).resolve().parent.parent
+DEFAULT_ROBOT_URL = "http://127.0.0.1:8000"
 
 
 def _text(env: Mapping[str, str], name: str, default: str = "") -> str:
@@ -34,11 +39,14 @@ def _number(env: Mapping[str, str], name: str, default: float, low: float, high:
     try:
         value = float(raw)
     except ValueError:
-        log.warning("%s=%r is not a number; using %s", name, raw, default)
+        log.warning("%s is not a number; using %s", name, default)
+        return default
+    if value != value:  # NaN compares unequal to itself
+        log.warning("%s is not a number; using %s", name, default)
         return default
     if not low <= value <= high:
         clamped = min(high, max(low, value))
-        log.warning("%s=%s is outside %s to %s; using %s", name, raw, low, high, clamped)
+        log.warning("%s is outside %s to %s; using %s", name, low, high, clamped)
         return clamped
     return value
 
@@ -48,6 +56,17 @@ def _flag(env: Mapping[str, str], name: str, default: bool) -> bool:
     if not raw:
         return default
     return raw in ("1", "true", "yes", "on")
+
+
+def _wheels(env: Mapping[str, str]) -> str:
+    """"on" only for exactly `ARGOS_WHEELS=1` (contract section 2). "fake" is a pretend base
+    that moves nothing, for a laptop. Anything else, or nothing, is "off"."""
+    raw = _text(env, "ARGOS_WHEELS").lower()
+    if raw == "1":
+        return "on"
+    if raw == "fake":
+        return "fake"
+    return "off"
 
 
 def _path(env: Mapping[str, str], name: str, default: str) -> Path:
@@ -105,6 +124,21 @@ class Settings:
     # Live view
     live_view: bool
     live_view_fps: float
+    # The head press as a pat
+    head_pat: bool
+    head_pat_mm: float
+    head_pat_deg: float
+    head_pat_hold_s: float
+    # The wheels and the approach. Power is a share of full, and never above MAX_POWER.
+    wheels: str  # "on", "fake" or "off"
+    wheels_power: float
+    wheels_turn_power: float
+    wheels_invert_left: bool
+    wheels_invert_right: bool
+    approach_max_s: float
+    approach_rest_s: float
+    # The call agent (call/) writes the call events instead of the brain
+    call_agent: bool
 
     @property
     def backend_configured(self) -> bool:
@@ -115,7 +149,9 @@ class Settings:
         if self.robot.lower() == "off":
             return None
         if self.robot.lower() in ("", "auto"):
-            return "http://localhost:8000"
+            # The daemon listens on 127.0.0.1 only. "localhost" can resolve to ::1 first, which
+            # on Windows costs a timeout before the right address is tried.
+            return DEFAULT_ROBOT_URL
         return self.robot.rstrip("/")
 
     @classmethod
@@ -162,13 +198,41 @@ class Settings:
             snapshot_timeout_s=_number(env, "ARGOS_SNAPSHOT_TIMEOUT_S", 10.0, 1.0, 60.0),
             live_view=_text(env, "ARGOS_LIVE_VIEW") == "1",
             live_view_fps=_number(env, "LIVE_VIEW_FPS", 4.0, 0.5, 8.0),
+            head_pat=_flag(env, "ARGOS_HEAD_PAT", True),
+            head_pat_mm=_number(env, "ARGOS_HEAD_PAT_MM", 5.0, 1.0, 50.0),
+            head_pat_deg=_number(env, "ARGOS_HEAD_PAT_DEG", 5.0, 1.0, 45.0),
+            head_pat_hold_s=_number(env, "ARGOS_HEAD_PAT_HOLD_S", 0.5, 0.2, 3.0),
+            wheels=_wheels(env),
+            wheels_power=_number(env, "ARGOS_WHEELS_POWER", LOWEST_POWER, 0.05, MAX_POWER),
+            wheels_turn_power=_number(env, "ARGOS_WHEELS_TURN_POWER", LOWEST_POWER, 0.05,
+                                      MAX_POWER),
+            wheels_invert_left=_flag(env, "ARGOS_WHEELS_INVERT_LEFT", False),
+            wheels_invert_right=_flag(env, "ARGOS_WHEELS_INVERT_RIGHT", False),
+            approach_max_s=_number(env, "ARGOS_APPROACH_MAX_S", 6.0, 1.0, 15.0),
+            approach_rest_s=_number(env, "ARGOS_APPROACH_REST_S", 300.0, 30.0, 86400.0),
+            call_agent=_text(env, "ARGOS_CALL_AGENT") == "1",
         )
+
+    @classmethod
+    def names(cls) -> tuple[str, ...]:
+        """Every setting name this program reads, in the order it reads them."""
+        recorder = _NameRecorder()
+        cls.from_env(recorder)
+        return tuple(recorder.read)
 
     def describe(self) -> list[str]:
         """Lines for the start-up log. Says what is on, never a key or a contact value."""
+        escalation = (
+            "escalation: the call agent places the call and writes its events "
+            "(ARGOS_CALL_AGENT=1); the brain records none of them"
+            if self.call_agent else f"escalation: dry-run, contact label {self.contact_label!r}"
+        )
+        wheels = {"on": "on (they arm only when a keyboard is attached)",
+                  "fake": "pretend (ARGOS_WHEELS=fake): nothing moves",
+                  "off": "off"}[self.wheels]
         return [
             f"backend: {'on' if self.backend_configured else 'off (no SUPABASE settings)'}",
-            f"escalation: dry-run, contact label {self.contact_label!r}",
+            escalation,
             f"check timeout: {self.check_timeout_s:g} s",
             f"sensor board: {self.serial_port or 'none'}",
             f"robot: {self.robot_url or 'off'}",
@@ -176,4 +240,20 @@ class Settings:
             f"voice: {'ElevenLabs' if self.elevenlabs_api_key else 'no key'}; "
             f"Gemini: {self.gemini_model if self.gemini_api_key else 'no key'}",
             f"live view: {f'on at {self.live_view_fps:g} fps' if self.live_view else 'off'}",
+            f"head press as a pat: {'on' if self.head_pat else 'off'}; "
+            f"antenna press: {'on' if self.robot_antenna_pat else 'off'}",
+            f"wheels: {wheels}",
         ]
+
+
+class _NameRecorder(dict[str, str]):
+    """A stand-in environment, empty, that remembers which names were asked for."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.read: list[str] = []
+
+    def get(self, key: str, default: object = None) -> object:  # type: ignore[override]
+        if key not in self.read:
+            self.read.append(key)
+        return default

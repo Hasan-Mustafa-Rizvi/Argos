@@ -15,3 +15,8 @@ mediapipe==1.2.3
 vosk==0.3.45
 sounddevice==0.5.6
 google-genai==3.3.0
+# Stage 3: the wheels. Linux only. Loaded only by the wheel guard process, which starts only
+# when ARGOS_WHEELS=1. On a Pi 5 gpiozero drives the pins through lgpio (a wheel for Python
+# 3.12 on aarch64); gpiozero brings colorzero.
+gpiozero==2.0.1 ; sys_platform == "linux"
+lgpio==0.2.2.0 ; sys_platform == "linux"

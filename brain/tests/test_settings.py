@@ -46,7 +46,7 @@ def test_defaults_with_nothing_set() -> None:
     assert settings.serial_port == ""
     assert settings.live_view is False
     assert settings.live_view_fps == 4.0
-    assert settings.robot_url == "http://localhost:8000"
+    assert settings.robot_url == "http://127.0.0.1:8000"  # the daemon binds 127.0.0.1 only
     assert settings.contact_label == "Family"
 
 

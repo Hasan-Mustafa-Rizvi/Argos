@@ -78,7 +78,7 @@ def build_senses(settings: Settings, clock: Clock, hub: BodyHub, store: Store | 
     robot = settings.robot_url is not None
     senses.camera = _camera(settings, clock, hub)
     if senses.camera is not None:
-        senses.vision = _vision(settings, clock, senses.camera)
+        senses.vision = _vision(settings, clock, senses.camera, hub)
     senses.listener = _listener(settings, clock, robot)
     senses.voice = _voice(settings, clock, robot)
     senses.judge = _judge(settings)
@@ -106,7 +106,7 @@ def _camera(settings: Settings, clock: Clock, hub: BodyHub) -> Any:
                   moving_until=hub.moving_until)
 
 
-def _vision(settings: Settings, clock: Clock, camera: Any) -> Any:
+def _vision(settings: Settings, clock: Clock, camera: Any, hub: BodyHub | None = None) -> Any:
     from argos.senses.vision import FallDetector, MediaPipePose, StillnessTracker, Vision
 
     estimator = None
@@ -122,6 +122,7 @@ def _vision(settings: Settings, clock: Clock, camera: Any) -> Any:
         StillnessTracker(settings.stillness_s, settings.still_move, settings.person_min_score),
         fps=settings.detect_fps,
         hfov_deg=settings.camera_hfov_deg,
+        moving_until=hub.moving_until if hub is not None else (lambda: 0.0),
     )
 
 

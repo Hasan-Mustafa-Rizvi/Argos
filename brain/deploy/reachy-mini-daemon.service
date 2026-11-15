@@ -1,17 +1,24 @@
-# The robot's own software, started at boot on the Raspberry Pi. A user service:
-#   mkdir -p ~/.config/systemd/user && cp deploy/*.service ~/.config/systemd/user/
+# The robot's own software, started at boot on the Raspberry Pi. A user service.
+#
+# Install both services, once the brain has run well by hand (brain/FIRST_RUN.md):
+#   mkdir -p ~/.config/systemd/user && cp ~/Argos/brain/deploy/*.service ~/.config/systemd/user/
 #   systemctl --user daemon-reload
 #   systemctl --user enable --now reachy-mini-daemon argos-brain
 #   sudo loginctl enable-linger "$USER"     # so user services start at boot, before login
+# Watch them:
+#   systemctl --user status reachy-mini-daemon argos-brain
+#   journalctl --user -u argos-brain -f
 #
 # --no-media leaves the camera and the audio card to the brain, which opens them directly.
-# Assumes the daemon was installed in ~/reachy/.venv (see brain/README.md).
+# The daemon of a Lite listens on 127.0.0.1:8000 only. Assumes the daemon was installed in
+# ~/reachy/.venv (see brain/README.md).
 
 [Unit]
 Description=Reachy Mini daemon (robot motors), no media
 After=network.target
 
 [Service]
+Environment=PYTHONUNBUFFERED=1
 ExecStart=%h/reachy/.venv/bin/reachy-mini-daemon --no-media --headless --no-preload-datasets
 Restart=on-failure
 RestartSec=5

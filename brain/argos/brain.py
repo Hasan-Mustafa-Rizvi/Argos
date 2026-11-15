@@ -8,6 +8,15 @@ Gemini check, the summary, the snapshot, polling for an acknowledgement) run on 
 Rule 1 lives here: a frame from the camera is held in memory from the moment of a trigger and
 dropped the moment the check stands down. Only an escalation hands it on, to become the
 snapshot.
+
+The wheels' approach (`approach.py`) is stepped here too, when the wheels are on. It starts
+only after the question has been asked, never changes how long the brain waits for an
+answer, and is ended the moment the check ends. The stop key goes to the wheels directly,
+from the keyboard's thread, not through this queue.
+
+A pat from the body is dropped if any part of the body moved within the last half second
+(rule 3 of the task: the brain's own movement is never read as a press). The robot driver
+already holds back; this is the second line.
 """
 
 from __future__ import annotations
@@ -21,6 +30,7 @@ from dataclasses import dataclass
 from typing import Any, Protocol
 
 from argos import text
+from argos.approach import Approach
 from argos.body.base import (
     BodyEvent,
     BodyHub,
@@ -31,6 +41,8 @@ from argos.body.base import (
     Tipped,
     Upright,
 )
+from argos.body.poses import PAT_QUIET_S
+from argos.body.wheels import Wheels
 from argos.clock import Clock
 from argos.config import Settings
 from argos.escalation import Escalator
@@ -54,6 +66,7 @@ log = logging.getLogger("argos.brain")
 
 HEARTBEAT_S = 5.0
 CAMERA_TRIGGERS = ("fall", "stillness")
+STOP_KEYS = (" ", "x")
 
 # --------------------------------------------------------------------------- inputs
 
@@ -91,6 +104,7 @@ class AckIn:
 @dataclass(frozen=True)
 class AskedIn:
     incident_id: str
+    spoken: bool = True  # False: no voice, and at most a beep went out
 
 
 @dataclass(frozen=True)
@@ -163,7 +177,8 @@ def call_with_timeout(job: Callable[[], Any], timeout_s: float) -> Any:
 
 
 class Voice(Protocol):
-    def say(self, key: str, on_done: Callable[[], None] | None = None) -> str: ...
+    def say(self, key: str, on_done: Callable[[], None] | None = None,
+            on_spoken: Callable[[bool], None] | None = None) -> str: ...
 
 
 class Vision(Protocol):
@@ -188,6 +203,7 @@ class Gate:
     def __init__(self) -> None:
         self.mode = "help"  # "help" in calm, "answer" during an asked check, "off" otherwise
         self.speaking_until = 0.0  # set by the voice: nothing is heard until then
+        self.motors_until = 0.0  # set by the wheels, a field of their own: deaf until then
 
 
 # --------------------------------------------------------------------------- the brain
@@ -210,6 +226,7 @@ class Brain:
         judge: Judge | None = None,
         uploader: Callable[[str, Any], str | None] | None = None,
         script: ScriptPlayer | None = None,
+        wheels: Wheels | None = None,
     ) -> None:
         self.settings = settings
         self.clock = clock
@@ -236,7 +253,25 @@ class Brain:
         self._caps: list[str] | None = None
         self._fw: str | None = None
         self._started = False
+        self._stopped = False
         self._calm_since = -math.inf
+        self._ask_spoken: dict[str, bool] = {}
+        self._resumed_incident: str | None = None
+        self._last_approach_end = -math.inf
+        self.wheels = wheels
+        self.approach: Approach | None = None
+        if wheels is not None:
+            look = getattr(vision, "look", None) or (lambda: None)
+            wheels.open_check = lambda: (self.machine.incident_id
+                                         if self.machine.state is State.CHECKING else None)
+            wheels.look = look
+            wheels.moved_until = bodies.moving_until
+            wheels.gate = self.gate
+            self.approach = Approach(
+                wheels, look, bodies.face_forward, bodies.moving_until, clock,
+                max_s=settings.approach_max_s, min_score=settings.person_min_score,
+                needs_head=not wheels.pretend, on_end=self._approach_ended,
+            )
 
     # ------------------------------------------------------------------ inputs
 
@@ -257,10 +292,20 @@ class Brain:
             self.post(AckIn(text.DEMO_LABEL, local=True))
         elif key == "q":
             self.post(QuitIn())
+        elif key in STOP_KEYS:
+            self.stop_wheels()
         elif key == "?":
             from argos.keyboard import help_text
 
             print(help_text(), flush=True)
+
+    def stop_wheels(self) -> None:
+        """The stop key: straight to the wheels, on the keyboard's own thread, not through the
+        queue. It latches until the brain is started again."""
+        if self.wheels is not None:
+            self.wheels.latch()
+        else:
+            log.info("stop key: there are no wheels to stop")
 
     @property
     def state(self) -> State:
@@ -296,6 +341,14 @@ class Brain:
         self._started = True
 
     def stop(self) -> None:
+        """For any reason at all: the wheels stop first, then the rest. Safe to call twice."""
+        if self._stopped:
+            return
+        self._stopped = True
+        if self.approach is not None:
+            self.approach.cancel("the brain is stopping")
+        if self.wheels is not None:
+            self.wheels.halt("the brain is stopping")
         self.bodies.stop()
         self.writer.close()
 
@@ -370,6 +423,7 @@ class Brain:
         log.warning("incident %s was still checking when the brain last stopped: asking again",
                     incident_id)
         self.recorder.note(f"resumed check for incident {incident_id}")
+        self._resumed_incident = incident_id  # no approach on a resumed check
         return [_Resumed(self.machine.resume_check(incident_id, trigger, confidence,
                                                    self.clock.now()))]
 
@@ -388,6 +442,12 @@ class Brain:
             self._handle(item, self.clock.now())
         now = self.clock.now()
         self._apply(self.machine.tick(now), now)
+        if self.approach is not None:
+            try:
+                self.approach.step(now)
+            except Exception:  # the wheels must never stop a check
+                log.exception("the approach failed; the wheels are stopped")
+                self._end_approach("it failed")
         if now >= self._next_heartbeat:
             self._next_heartbeat = now + HEARTBEAT_S
             self.recorder.device(last_seen_at=self.clock.iso())
@@ -422,7 +482,9 @@ class Brain:
         elif isinstance(item, AckIn):
             self._apply(self.machine.acknowledge(item.by, item.at, item.local, now), now)
         elif isinstance(item, AskedIn):
+            self._ask_spoken[item.incident_id] = item.spoken
             self._apply(self.machine.asked(item.incident_id, now), now)
+            self._ask_spoken.pop(item.incident_id, None)
         elif isinstance(item, ConfidenceIn):
             self.recorder.incident_confidence(item.incident_id, item.value)
         elif isinstance(item, ReportIn):
@@ -479,18 +541,58 @@ class Brain:
             self._start_gemini_check(check.incident_id, self.held_frame)
         incident_id = check.incident_id
         if self.voice is None:
-            self.post(AskedIn(incident_id))
+            self.bodies.beep(300)  # the sensor board's buzzer, if there is one
+            self.post(AskedIn(incident_id, spoken=False))
         else:
-            self.voice.say("ask", on_done=lambda: self.post(AskedIn(incident_id)))
+            self.voice.say("ask", on_spoken=lambda spoken: self.post(AskedIn(incident_id,
+                                                                             spoken)))
 
     def _on_asked(self, effect: Asked) -> None:
         if effect.late:
             log.warning("the question was not reported as spoken in time; the wait starts now")
         said = text.ASK_LINE
-        self.recorder.event("asked", text.asked(said), {"said": said}, effect.incident_id)
+        detail: dict[str, Any] = {"said": said}
+        # Contract section 3: "spoken": false when the line did not play (no voice; a beep at
+        # most). A question never reported as played counts as not spoken.
+        if effect.late or not self._ask_spoken.get(effect.incident_id, False):
+            detail["spoken"] = False
+        self.recorder.event("asked", text.asked(said), detail, effect.incident_id)
         self.gate.mode = "answer"
+        if not effect.late:
+            self._maybe_approach(effect.incident_id)
+
+    # ------------------------------------------------------------------ the approach
+
+    def _maybe_approach(self, incident_id: str) -> None:
+        """After the question: turn toward the person and come a little closer, if every rule
+        allows it. It never changes the wait for an answer."""
+        if self.approach is None:
+            return
+        why = None
+        if self.script is not None:
+            why = "this is a scripted run"
+        elif incident_id == self._resumed_incident:
+            why = "this check was resumed after a restart"
+        elif self.clock.now() < self._last_approach_end + self.settings.approach_rest_s:
+            why = "the last approach was too recent"
+        if why is None:
+            why = self.approach.start(incident_id)
+        if why is not None:
+            log.info("no approach: %s", why)
+
+    def _approach_ended(self, reason: str) -> None:
+        self._last_approach_end = self.clock.now()
+        if self.machine.state is State.CHECKING:
+            self._show_body()  # face the person again, from where the base now is
+
+    def _end_approach(self, reason: str) -> None:
+        if self.approach is not None:
+            self.approach.cancel(reason)
+        if self.wheels is not None:
+            self.wheels.halt(reason)
 
     def _on_stood_down(self, effect: StoodDown) -> None:
+        self._end_approach("the check stood down")
         stamp = self.clock.iso()
         person = self.recorder.person
         if effect.by == "voice":
@@ -510,6 +612,7 @@ class Brain:
             self.voice.say("stood_down")
 
     def _on_escalated(self, effect: Escalated) -> None:
+        self._end_approach("the check escalated")
         stamp = self.clock.iso()
         incident_id = effect.incident_id
         self.recorder.event("escalated", text.escalated(self.settings.check_timeout_s), {},
@@ -531,6 +634,7 @@ class Brain:
         self._next_ack_poll = self.clock.now() + self.settings.ack_poll_s
 
     def _on_acknowledged(self, effect: Acknowledged) -> None:
+        self._end_approach("the alert was acknowledged")
         stamp = self.clock.iso()
         by = effect.by if not effect.local else text.DEMO_LABEL
         at = effect.at or stamp
@@ -570,6 +674,10 @@ class Brain:
 
     def _body_event(self, event: BodyEvent, now: float) -> None:
         if isinstance(event, Pat):
+            if now < self.bodies.moving_until() + PAT_QUIET_S:
+                log.info("a pat from %s came while the body was moving, or just after: "
+                         "ignored", event.source)
+                return
             if self.machine.state is State.CHECKING:
                 self._handle(AnswerIn("pat", source=event.source), now)
             else:
@@ -580,6 +688,8 @@ class Brain:
         elif isinstance(event, Upright):
             log.info("set upright again")
         elif isinstance(event, (Connected, Disconnected)):
+            if self.approach is not None and self.approach.active:
+                self._end_approach(f"the {event.source} came or went")
             caps, fw = self.bodies.caps(), self.bodies.fw()
             if caps != self._caps or fw != self._fw:
                 self._caps, self._fw = caps, fw

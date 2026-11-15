@@ -68,17 +68,21 @@ class Broadcaster:
         self._client = httpx.Client(base_url=url, headers=auth_headers(key), timeout=timeout_s,
                                     transport=transport)
         self._warned = False
+        self.last_error = ""  # why the last frame was not sent, for `--check`
 
     def send(self, message: dict[str, Any]) -> bool:
         try:
             response = self._client.post(self.path, params={"private": "true"}, json=message)
         except httpx.HTTPError as exc:
-            self._warn(type(exc).__name__)
+            self.last_error = type(exc).__name__
+            self._warn(self.last_error)
             return False
         if response.status_code >= 300:
-            self._warn(f"HTTP {response.status_code}")
+            self.last_error = f"HTTP {response.status_code}"
+            self._warn(self.last_error)
             return False
         self._warned = False
+        self.last_error = ""
         return True
 
     def _warn(self, reason: str) -> None:

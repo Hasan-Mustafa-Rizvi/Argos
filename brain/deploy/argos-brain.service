@@ -1,18 +1,30 @@
 # The Argos brain, started at boot on the Raspberry Pi. A user service; see
-# reachy-mini-daemon.service for how to install both.
+# reachy-mini-daemon.service for how to install both. Start the brain by hand first, and
+# watch it, before trusting this (brain/FIRST_RUN.md).
 #
-# A service has no terminal, so the keys are off. For the demo, when the keys are wanted,
-# stop this service and run the brain in a terminal over SSH instead (see brain/README.md).
-# Settings come from brain/.env. Assumes the repo is at ~/ARGOS.
+# A service has no terminal, so the keys are off, and so the wheels never arm under it: the
+# stop key must be at hand whenever they can move. For the demo, when the keys or the wheels
+# are wanted, stop this service and run the brain in a terminal over SSH (inside tmux).
+#
+# Settings come from brain/.env. Assumes the repo is cloned at ~/Argos (the folder a clone
+# of the Argos repository makes; Linux paths are case-sensitive).
+#
+# Stopping: systemd sends SIGTERM, which the brain handles (the wheels stop, the robot rests,
+# the records are flushed). After it has gone, ExecStopPost drives the six wheel pins low as
+# a backstop; that touches no pin unless ARGOS_WHEELS=1.
 
 [Unit]
 Description=Argos brain
 Wants=reachy-mini-daemon.service
-After=reachy-mini-daemon.service network-online.target
+After=reachy-mini-daemon.service network-online.target pipewire.service wireplumber.service
 
 [Service]
-WorkingDirectory=%h/ARGOS/brain
-ExecStart=%h/ARGOS/brain/.venv/bin/python -m argos --no-keys
+WorkingDirectory=%h/Argos/brain
+Environment=PYTHONUNBUFFERED=1
+ExecStart=%h/Argos/brain/.venv/bin/python -m argos --no-keys
+ExecStopPost=%h/Argos/brain/.venv/bin/python -m argos.body.guard --pins-low
+KillSignal=SIGTERM
+TimeoutStopSec=20
 Restart=on-failure
 RestartSec=5
 

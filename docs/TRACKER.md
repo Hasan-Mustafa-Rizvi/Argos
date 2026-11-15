@@ -84,7 +84,7 @@ Not entering: FaZe Clan, Solana, Tiger Data, MongoDB Atlas, Vultr.
 
 | Account | Needed by | State |
 |---|---|---|
-| GitHub, Netlify | M0, M2 | Ready. The dashboard is live at https://argos-watch.netlify.app, linked to the GitHub repo, so every push to `main` deploys. `argos-live-tracker` is the team tracker page, unrelated. |
+| GitHub, Netlify | M0, M2 | Ready. The dashboard is live at https://argos-is-furreal.health (also https://argos-watch.netlify.app), linked to the GitHub repo, so every push to `main` deploys. `argos-live-tracker` is the team tracker page, unrelated. |
 | Supabase | M3 | Ready. Project "Argos". New tables are not exposed to the API unless granted. |
 | Gemini (Google AI Studio) | M5 | To create. Use a paid-tier key: on the free tier the frames sent may be used by Google and seen by reviewers. |
 | ElevenLabs | M5 | To create. One free month of Creator through the coupon bot in the ElevenLabs Discord, using the HackUTA registration email. |
@@ -110,7 +110,8 @@ With Neel and Farrell:
 ## Known limits
 
 - Nothing in `brain/` has run on the real Pi, robot, camera, microphone or speaker, or against the real backend or real keys.
-- The pat the brain senses today is a press on an antenna, not on the head.
+- The head press is built but its thresholds are guesses until measured on the robot.
+- The wheels, the guard and the approach have only run against fakes.
 - The dashboard's live picture and stored snapshot have never been seen with a real camera. Everything else on it has been seen against the real backend.
 - The live view over the venue network is untested.
 - The call agent has not run against the real backend with the brain: the acknowledgement reaching the database, the dashboard clearing and the dog calming are proven only on fakes.
@@ -121,6 +122,23 @@ With Neel and Farrell:
 - A manual override was mentioned by Hasan as a possible later addition. Not specified.
 
 ## Log
+
+### Sun Nov 15, 1:50 AM
+Brain B built by Claude Code on Hasan's machine against fakes, rebuilt from a clean copy on
+Linux and reviewed: the check command for the first run, the head press, the wheels behind a
+separate guard process, the approach, the call agent switch, and `spoken: false`. 300 tests
+pass here, the three Linux-only guard tests among them (they kill the brain side outright
+and the pins go to stopped). One test fails only off Python 3.12, because it reads the real
+interpreter version. Lint clean. None of it has met the robot, the Pi or the wheels.
+`brain/FIRST_RUN.md` is the sheet for the first run.
+
+What the hardware team must add: a 10 kΩ pull-down from ENA to ground and from ENB to
+ground, and a switch on the motor battery. The wheels only arm when the brain is started by
+hand in a terminal with `ARGOS_WHEELS=1`.
+
+The domain is live: https://argos-is-furreal.health, registered for the GoDaddy Registry
+prize, pointed at the Netlify site. Plan changed: the hardware run happens from Hasan's
+laptop over SSH to the Pi, not from Neel's machine.
 
 ### Sun Nov 15, 12:30 AM
 The call agent is built (Claude Code, `call/`), rebuilt from a clean copy and reviewed: 83

@@ -15,6 +15,13 @@ Two small, plain rules sit on top of it:
 Both only fire while Argos is calm and a cooldown has passed since the last check ended, so
 a person who has just said "I'm fine" is not asked again a second later.
 
+A moving camera is not a moving person. The camera hands out no frame taken while the head
+or the wheels move (`camera.py`). After a move the view has shifted, so the first frame
+after it becomes the new reference for stillness, without counting as movement.
+
+For the wheels, `look()` gives the newest frame looked at: when it was captured and the
+person in it, so the approach steers only by a fresh sighting.
+
 The model runs on a frame at a time, at `ARGOS_DETECT_FPS` (8), on frames scaled to at most
 480 pixels wide. It is skipped while the robot's head moves. On a Raspberry Pi 5 this is well
 inside one CPU core; on a laptop it is a few milliseconds a frame.
@@ -239,6 +246,19 @@ class StillnessTracker:
             return True
         return sum(shifts) / len(shifts) > self.move
 
+    def rebase(self, pose: PersonPose | None, now: float) -> None:
+        """The camera itself moved (the head or the wheels): take this pose as the new
+        reference, without counting it as the person moving."""
+        if pose is None or pose.score < self.min_score:
+            self.update(pose, now)
+            return
+        self.present = True
+        self._last_seen = now
+        self._scores.append(pose.score)
+        self._reference = pose
+        if self._still_since is None:
+            self._still_since = now
+
     def update(self, pose: PersonPose | None, now: float) -> float | None:
         """The confidence when stillness passes the threshold now, else None."""
         if pose is None or pose.score < self.min_score:
@@ -265,6 +285,15 @@ class StillnessTracker:
 # --------------------------------------------------------------------------- the loop
 
 
+@dataclass(frozen=True)
+class Look:
+    """The newest frame the pose model looked at: when it was captured (the clock's `now`),
+    and the person in it, or None when nobody was clear enough to count."""
+
+    t: float
+    pose: PersonPose | None
+
+
 class Vision:
     """Runs the pose model on the camera's still frames and posts triggers to the brain."""
 
@@ -277,6 +306,7 @@ class Vision:
         still: StillnessTracker,
         fps: float = 8.0,
         hfov_deg: float = 70.0,
+        moving_until: Callable[[], float] = lambda: 0.0,
     ) -> None:
         self.frames = frames
         self.estimator = estimator
@@ -285,10 +315,13 @@ class Vision:
         self.still = still
         self.period = 1.0 / fps
         self.hfov_deg = hfov_deg
+        self.moving_until = moving_until
         self.on_trigger: Callable[[str, float, Any], None] = lambda kind, conf, frame: None
         self.can_trigger: Callable[[], bool] = lambda: True
         self._last_t = -1.0
+        self._prev_t = 0.0
         self._bearing: float | None = None
+        self._look: Look | None = None
         self._lock = threading.Lock()
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
@@ -304,15 +337,30 @@ class Vision:
         with self._lock:
             return self._bearing if self.still.present else None
 
+    def look(self) -> Look | None:
+        """The newest frame looked at, and the person in it. For the wheels."""
+        with self._lock:
+            return self._look
+
     # One step, for the thread and for tests.
 
     def process(self, frame: Any, pose: PersonPose | None) -> None:
         now = self.clock.now()
+        captured = getattr(frame, "t", now)
+        # Did the head or the wheels move since the last frame looked at?
+        moved = self.moving_until() > self._prev_t
+        self._prev_t = captured
         with self._lock:
             fell = self.fall.update(pose, now)
-            stilled = self.still.update(pose, now)
+            if moved:
+                self.still.rebase(pose, now)
+                stilled = None
+            else:
+                stilled = self.still.update(pose, now)
             if pose is not None and (cx := pose.center_x()) is not None:
                 self._bearing = (0.5 - cx / pose.width) * self.hfov_deg
+            person = pose if pose is not None and pose.score >= self.still.min_score else None
+            self._look = Look(captured, person)
         if not self.can_trigger():
             return
         if fell is not None:

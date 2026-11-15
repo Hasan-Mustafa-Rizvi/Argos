@@ -218,7 +218,7 @@ rule is about what is stored. The live view in section 6 is never stored at all.
 |---|---|
 | `device_online` | `{}` |
 | `trigger` | `{"trigger": "...", "confidence": 0.91}` |
-| `asked` | `{"said": "Are you okay?"}`. May carry `"spoken": false` when no voice was available and only a beep went out. |
+| `asked` | `{"said": "Are you okay?"}`. Carries `"spoken": false` when the line was not played, whether or not a beep went out. |
 | `heard` | `{"said": "I'm fine"}` |
 | `pat` | `{}` |
 | `stood_down` | `{"by": "voice"}` |

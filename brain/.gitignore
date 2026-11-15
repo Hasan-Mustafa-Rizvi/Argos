@@ -7,6 +7,10 @@
 var/
 models/
 
+# lgpio's notification files, should one ever land here (the guard points them at the temp
+# folder)
+.lgd-nfy*
+
 # Python
 .venv/
 __pycache__/

@@ -83,6 +83,10 @@ class BodyHub:
         self._lock = threading.Lock()
         self._telemetry: tuple[float, Telemetry] | None = None
         self._emit: Emit = lambda event: None
+        # A body that senses a pat must know when any part moves, the wheels included.
+        for body in self.bodies:
+            if hasattr(body, "body_moving_until"):
+                body.body_moving_until = self.moving_until  # type: ignore[attr-defined]
 
     def start(self, emit: Emit) -> None:
         self._emit = emit
@@ -134,8 +138,20 @@ class BodyHub:
         return None
 
     def moving_until(self) -> float:
+        """When the last movement of any part ends: the robot's head, the wheels. The camera
+        holds frames back and no pat is taken until a little after this."""
         times = [self._safely(body, "moving_until", body.moving_until) for body in self.bodies]
         return max([t for t in times if isinstance(t, (int, float))], default=0.0)
+
+    def face_forward(self) -> bool:
+        """Head level and straight ahead, for the approach. True if a body will do it. A body
+        without a head simply does not have the method."""
+        done = False
+        for body in self.bodies:
+            method = getattr(body, "face_forward", None)
+            if method is not None:
+                done = bool(self._safely(body, "face_forward", method)) or done
+        return done
 
     def sensors(self) -> tuple[float | None, float | None]:
         """Latest temperature and tilt, or None when no fresh telemetry has arrived."""
