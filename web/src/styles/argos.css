@@ -175,7 +175,7 @@
 /* -------------------------------------------------------------- meander */
 
 /*
- * One Greek key for the site: the heartbeat, and the sign-in plate's top and bottom.
+ * One Greek key for the site: the heartbeat under the dashboard header.
  * 24 px wide, 12 px tall, a 2 px stroke. Never scaled.
  * The wave is one running-dog curl, 48 by 24, the same stroke. It tiles; it is not a picture.
  */
@@ -969,56 +969,28 @@
   color: var(--soft);
 }
 
-/* A short band above the form. The seal is a fixed square, cropped, never squashed. */
+/* The night-watch drawing, whole, at its own proportions, centred. The panel fills the rest. */
 .argos-signin-plate {
   order: -1;
   flex: none;
-  --seal: 460px;
 }
 
 .argos-signin-face {
-  position: relative;
   display: flex;
-  flex-direction: column;
-  height: 168px;
-  overflow: hidden;
+  align-items: center;
+  justify-content: center;
   background: var(--night);
   color: var(--on-night);
   border-bottom: 2px solid var(--ink);
 }
 
-.argos-signin-seal {
-  position: absolute;
-  z-index: 0;
-  left: 50%;
-  top: 78%;
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-}
-
-.argos-keyline {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex: none;
-  justify-content: center;
-  height: 12px;
-  overflow: hidden;
-  container-type: inline-size;
-}
-
-.argos-keyline-run {
-  flex: none;
-  width: round(down, 100cqi, 24px);
-  height: 12px;
+.argos-signin-drawing {
+  display: block;
+  width: 100%;
+  aspect-ratio: 750 / 300;
   background-color: currentColor;
-  -webkit-mask: var(--argos-key) 0 0 / 24px 12px repeat-x;
-  mask: var(--argos-key) 0 0 / 24px 12px repeat-x;
-}
-
-.argos-keyline-foot {
-  margin-top: auto;
-  transform: scaleY(-1);
+  -webkit-mask: url("/plates/signin-night-watch-band.svg") center / contain no-repeat;
+  mask: url("/plates/signin-night-watch-band.svg") center / contain no-repeat;
 }
 
 @media (min-width: 768px) {
@@ -1035,17 +1007,18 @@
     display: flex;
     min-height: 100dvh;
     padding: 20px;
-    --seal: max(158%, 118vh);
   }
   .argos-signin-face {
     flex: 1 1 auto;
-    height: auto;
     min-height: calc(100dvh - 40px);
     border: 2px solid var(--ink);
   }
-  .argos-signin-seal {
-    top: 50%;
-    left: 50%;
+  .argos-signin-drawing {
+    width: min(100%, calc((100dvh - 80px) * 720 / 760));
+    height: auto;
+    aspect-ratio: 720 / 760;
+    -webkit-mask-image: url("/plates/signin-night-watch.svg");
+    mask-image: url("/plates/signin-night-watch.svg");
   }
 }
 
@@ -1123,6 +1096,7 @@
 
 .argos-team .argos-plate {
   gap: 8px;
+  padding: 14px 16px 16px;
 }
 
 .argos-team-name {

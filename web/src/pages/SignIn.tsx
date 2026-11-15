@@ -116,13 +116,7 @@ export default function SignIn() {
 
       <aside className="argos-signin-plate">
         <div className="argos-signin-face">
-          <div className="argos-keyline" aria-hidden="true">
-            <span className="argos-keyline-run" />
-          </div>
-          <ArgosMark variant="mark" label="Argos" className="argos-signin-seal" size="var(--seal)" />
-          <div className="argos-keyline argos-keyline-foot" aria-hidden="true">
-            <span className="argos-keyline-run" />
-          </div>
+          <span className="argos-signin-drawing" role="img" aria-label="Argos" />
         </div>
       </aside>
     </div>

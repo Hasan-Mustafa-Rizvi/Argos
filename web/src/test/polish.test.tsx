@@ -104,12 +104,15 @@ describe("polish", () => {
     expect(document.body.innerHTML).not.toMatch(DASH)
   })
 
-  it("shows the Argos mark on the sign-in plate, and no horizon caption", async () => {
+  it("shows the night-watch drawing on the sign-in plate, named Argos, and no horizon caption", async () => {
     renderApp("/sign-in")
     await screen.findByRole("heading", { name: "Sign in" })
     const plate = document.querySelector(".argos-signin-plate")
     expect(plate).not.toBeNull()
-    expect(within(plate as HTMLElement).getByRole("img", { name: "Argos" })).toBeInTheDocument()
+    const root = plate as HTMLElement
+    expect(within(root).getByRole("img", { name: "Argos" })).toHaveClass("argos-signin-drawing")
+    expect(root.querySelector(".argos-keyline")).toBeNull()
+    expect(root.querySelector(".argos-signin-seal")).toBeNull()
     expect(document.body.textContent).not.toMatch(/horizon/i)
   })
 

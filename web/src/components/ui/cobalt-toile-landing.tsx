@@ -2280,9 +2280,9 @@ function Insights({ copy, items, id, reduced }: { copy: typeof DEFAULT_PRESS_COP
         <div className="ctl-presshead" data-rv="">
           <div>
             <span className="ctl-kicker">{copy.kicker}</span>
+            {/* Argos edit: the press heading's arrow is not part of this section. */}
             <h2 className="ctl-pressh" id={id + "-h"}>
               {copy.title}
-              <Icon name="ne" />
             </h2>
           </div>
         </div>
