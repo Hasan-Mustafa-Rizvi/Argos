@@ -1,6 +1,11 @@
 # Argos contract
 
-Version 0.4.1 · Sat Nov 14 2026
+Version 0.5 · Sat Nov 14 2026
+
+Changed in 0.5: escalation is carried by a call agent, a separate part that runs on a laptop
+and learns of incidents from the backend. New event `message_sent`. The call agent may
+acknowledge an incident on the contact's word (section 4) and may show the live view to the
+contact during the call (section 6). No record changed shape.
 
 Changed in 0.4.1: a reader of the live view forgets the last `seq` once the view has stopped
 (section 6). The dashboard listens for record changes on the private channel
@@ -193,12 +198,16 @@ rule is about what is stored. The live view in section 6 is never stored at all.
 | `call_placed` | `{"channel": "facetime", "to": "Daughter", "dry_run": false}` |
 | `call_answered` | `{"to": "Daughter"}` |
 | `call_failed` | `{"to": "Daughter", "reason": "..."}` |
+| `message_sent` | `{"channel": "imessage", "to": "Daughter", "dry_run": false}` |
 | `email_sent` | `{"to": "Daughter", "dry_run": false}` |
 | `acknowledged` | `{"by": "Daughter"}` |
 | `room_alert` | `{}`. Neither the detail nor the sentence states a temperature, because family reads events and does not read sensor readings. |
 | `device_tipped` | `{}` |
 
 `to` and `by` are always labels. Phone numbers and email addresses never appear in any record.
+
+The `call_` and `message_` events are written by the part that places the call: the call
+agent when it is running, otherwise the brain in dry-run.
 
 ### `readings`: sensor history
 
@@ -244,7 +253,8 @@ above.
 to `acknowledged` and fills `acknowledged_by` and `acknowledged_at`. The brain then sets
 `ended_at`, records the `acknowledged` event and returns the device to `calm`. The
 dashboard writes nothing else. The brain may make the same acknowledgement itself from its
-own keyboard, for a demo with no network, with the label "Demo".
+own keyboard, for a demo with no network, with the label "Demo". The call agent may make it
+when the contact says so on the call, with the contact's label followed by ", by FaceTime".
 
 ---
 
@@ -290,6 +300,9 @@ The live view is what the dog's camera sees, shown in the centre of the dashboar
 2. **Second factor only.** A frame reaches a browser only for a real account whose session
    has passed its second factor, and whose role is `family` for that device. This is enforced
    by the backend's access rules, not by the dashboard hiding a panel.
+   One more reader is allowed: the call agent, during the call it places for an escalated
+   incident, may show the frames to the emergency contact on that call. It reads them with
+   the backend's secret key on its own machine, keeps none, and stops when the call ends.
 3. **Off unless switched on.** The brain sends frames only when `ARGOS_LIVE_VIEW=1`. A
    missing value means off.
 
