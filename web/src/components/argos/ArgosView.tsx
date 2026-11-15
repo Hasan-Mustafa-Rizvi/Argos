@@ -12,25 +12,29 @@ export interface ArgosViewProps {
   snapshot?: React.ReactNode
   /** Set when Argos has stopped reporting: the mark fades and this line says when it was last seen. */
   lastSeen?: string
+  /** The live picture is faded once frames have stopped. */
+  faded?: boolean
   wrapClassName?: string
 }
 
 /** The night panel at the centre of the dashboard. */
-export function ArgosView({ message, picture, snapshot, lastSeen, wrapClassName }: ArgosViewProps) {
+export function ArgosView({ message, picture, snapshot, lastSeen, faded, wrapClassName }: ArgosViewProps) {
   return (
     <Plate label="Argos's view" tone="night" primary wrapClassName={wrapClassName} className="argos-view">
       <div className="argos-view-body">
         {picture ? (
-          <div className="argos-view-picture">{picture}</div>
+          <div className="argos-view-picture" data-faded={faded ? true : undefined}>
+            {picture}
+          </div>
         ) : (
           <>
             <span data-faded={lastSeen ? true : undefined} style={{ color: "var(--on-night)", display: "inline-flex" }}>
               <ArgosMark variant="mark" size="clamp(96px, 14vw, 160px)" />
             </span>
             <p className="argos-view-line">{message}</p>
-            {lastSeen && <p className="argos-view-line argos-mono">{lastSeen}</p>}
           </>
         )}
+        {lastSeen && <p className="argos-view-line argos-mono">{lastSeen}</p>}
         {snapshot}
       </div>
     </Plate>

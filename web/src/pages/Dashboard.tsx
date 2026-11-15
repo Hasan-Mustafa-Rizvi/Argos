@@ -1,6 +1,7 @@
 import * as React from "react"
 
 import { useSession } from "@/auth/context"
+import { isDashboardSession } from "@/auth/types"
 import { LogoReveal } from "@/components/argos/LogoReveal"
 import { markRevealPlayed, revealPlayed } from "@/components/argos/reveal"
 import { DashboardScreen } from "@/components/dashboard/DashboardScreen"
@@ -15,7 +16,7 @@ export default function DashboardRoute() {
     if (revealing) markRevealPlayed()
   }, [revealing])
 
-  if (!session) return null
+  if (!isDashboardSession(session)) return null
   if (revealing) return <LogoReveal onDone={() => setRevealing(false)} />
   return (
     <DataProvider session={session}>

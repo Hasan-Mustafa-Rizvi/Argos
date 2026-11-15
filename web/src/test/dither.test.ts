@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { BAYER, ditherIndex } from "@/components/argos/dither"
+import { BAYER, ditherImage, ditherIndex } from "@/components/argos/dither"
 
 describe("dither", () => {
   it("has 64 distinct Bayer thresholds inside (0, 1)", () => {
@@ -23,5 +23,15 @@ describe("dither", () => {
       expect(ditherIndex(-1, 7, b)).toBe(0)
       expect(ditherIndex(2, 7, b)).toBe(6)
     }
+  })
+
+  it("prints a 2 px cell without changing the picture's size", () => {
+    const ramp = ["#000000", "#ffffff"]
+    const black = ditherImage(new Uint8ClampedArray([0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255]), 2, 2, ramp)
+    const white = ditherImage(new Uint8ClampedArray(16).map((_, i) => (i % 4 === 3 ? 255 : 255)), 2, 2, ramp)
+    expect(black).toHaveLength(16)
+    expect(white).toHaveLength(16)
+    expect([black[0], black[1], black[2]]).toEqual([0, 0, 0])
+    expect([white[0], white[1], white[2]]).toEqual([255, 255, 255])
   })
 })

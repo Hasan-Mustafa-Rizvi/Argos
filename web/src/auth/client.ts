@@ -1,7 +1,11 @@
+import { liveConfigured } from "@/live/settings"
+
 import { createDemoAuth } from "./demo"
+import { createLiveAuth } from "./liveAuth"
 import type { AuthClient } from "./types"
 
-/** The auth client for this build. Real accounts arrive with a Supabase implementation here. */
+/** Demo auth, unless the site is in live mode with both settings set. */
 export function createAuthClient(): AuthClient {
-  return createDemoAuth()
+  if (!liveConfigured()) return createDemoAuth()
+  return createLiveAuth()
 }

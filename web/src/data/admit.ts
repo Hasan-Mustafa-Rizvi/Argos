@@ -59,12 +59,25 @@ function isStatus(v: unknown): v is IncidentStatus {
   return INCIDENT_STATUSES.includes(v as IncidentStatus)
 }
 
-/** A device row. An unknown state keeps the state the dashboard already had. */
+/**
+ * A device row. An unknown state keeps the state the dashboard already had.
+ * `last_seen_at` may be null: the contract allows it, and the seeded dog is null until
+ * the brain first reports. A missing timestamp keeps the previous one when we have it.
+ */
 export function admitDevice(row: Row, mapTime: MapTime, previous: Device | null): Device | null {
   const id = str(row.id)
-  const lastSeen = time(row.last_seen_at, mapTime)
   const state = isDeviceState(row.state) ? row.state : previous?.state
-  if (!id || !lastSeen || !state) return null
+  if (!id || !state) return null
+  let lastSeen: string | null
+  if (!("last_seen_at" in row)) {
+    lastSeen = previous?.id === id ? previous.last_seen_at : null
+  } else if (row.last_seen_at === null) {
+    lastSeen = null
+  } else {
+    const mapped = time(row.last_seen_at, mapTime)
+    if (!mapped) return null
+    lastSeen = mapped
+  }
   return {
     id,
     name: str(row.name) ?? previous?.name ?? "Argos",

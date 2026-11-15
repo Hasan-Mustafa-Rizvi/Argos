@@ -23,7 +23,7 @@ export function usePrefersReducedMotion(): boolean {
 }
 
 /** Counts the changes of `key`: one step for every new report. */
-export function useBeat(key: string | undefined): number {
+export function useBeat(key: string | null | undefined): number {
   const [seen, setSeen] = React.useState({ key, beat: 0 })
   if (seen.key !== key) {
     const next = { key, beat: seen.beat + 1 }

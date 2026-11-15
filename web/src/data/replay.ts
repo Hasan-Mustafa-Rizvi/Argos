@@ -108,9 +108,17 @@ export function createReplaySource({
         incidents: incidentList.map(clinicianOnly),
         events: eventList,
         readings: [...(readings ?? [])],
+        notice: null,
       })
     }
-    return Object.freeze({ role: "family", source: "replay", device, incidents: incidentList, events: eventList })
+    return Object.freeze({
+      role: "family",
+      source: "replay",
+      device,
+      incidents: incidentList,
+      events: eventList,
+      notice: null,
+    })
   }
 
   function publish() {

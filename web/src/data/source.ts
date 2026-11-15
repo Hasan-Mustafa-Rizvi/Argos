@@ -10,6 +10,8 @@ interface ViewBase {
   readonly device: Device | null
   /** Newest first. */
   readonly events: readonly TimelineEvent[]
+  /** One plain line when the live backend cannot be reached. Replay is always null. */
+  readonly notice: string | null
 }
 
 /** What a family session receives. There is no `readings` key at all. */

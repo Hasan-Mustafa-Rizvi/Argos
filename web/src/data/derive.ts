@@ -4,7 +4,7 @@ import { OFFLINE_AFTER_MS, type Device, type Incident, type TimelineEvent } from
 
 /** `offline` is derived, never stored: no device yet, or no report for more than 15 s. */
 export function isOffline(device: Device | null, now: number): boolean {
-  if (!device) return true
+  if (!device?.last_seen_at) return true
   const seen = Date.parse(device.last_seen_at)
   return Number.isNaN(seen) || now - seen > OFFLINE_AFTER_MS
 }

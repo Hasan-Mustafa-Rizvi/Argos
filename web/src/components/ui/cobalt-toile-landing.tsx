@@ -2757,7 +2757,10 @@ function Footer({
             </button>
           </div>
         </div>
-        <p style={{ paddingBottom: 28, fontSize: 12, color: "var(--ctl-soft)" }}>{copyright}</p>
+        {/* Argos edit: an empty copyright string must not leave an empty paragraph. */}
+        {copyright ? (
+          <p style={{ paddingBottom: 28, fontSize: 12, color: "var(--ctl-soft)" }}>{copyright}</p>
+        ) : null}
       </div>
     </footer>
   )

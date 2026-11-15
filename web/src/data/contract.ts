@@ -23,7 +23,8 @@ export interface Device {
   readonly name: string
   readonly person_label: string
   readonly state: DeviceState
-  readonly last_seen_at: string
+  /** Null until the brain first reports. That dog is offline, not missing. */
+  readonly last_seen_at: string | null
   readonly fw: string | null
   readonly caps: readonly string[]
 }

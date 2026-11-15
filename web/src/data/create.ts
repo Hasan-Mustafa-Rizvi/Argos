@@ -1,16 +1,14 @@
-import type { Session } from "@/auth/types"
+import type { DashboardSession } from "@/auth/types"
 
+import { createLiveSource } from "./live"
 import { createReplaySource } from "./replay"
 import type { DataSource } from "./source"
 
 /**
- * The data source for a session. A demo session always plays the scripted run. This build has
- * no live source yet, so any other mode notes that and plays the run.
+ * A demo session always plays the scripted run, in every mode. A real session in live mode
+ * reads the backend. A real session never falls back to the script.
  */
-export function createDataSource(session: Session): DataSource {
-  const mode = import.meta.env.VITE_DATA_MODE ?? "replay"
-  if (mode !== "replay" && !session.demo) {
-    console.info(`[argos data] VITE_DATA_MODE "${mode}" is not built yet; playing the scripted run.`)
-  }
-  return createReplaySource({ role: session.role, label: session.label })
+export function createDataSource(session: DashboardSession): DataSource {
+  if (session.kind === "demo") return createReplaySource({ role: session.role, label: session.label })
+  return createLiveSource(session)
 }

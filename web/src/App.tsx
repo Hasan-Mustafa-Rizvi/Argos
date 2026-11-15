@@ -2,7 +2,7 @@ import * as React from "react"
 import { Navigate, Route, Routes } from "react-router"
 
 import { AuthProvider } from "@/auth/AuthProvider"
-import { RedirectIfSignedIn, RequireSession } from "@/auth/guards"
+import { RedirectIfSignedIn, RequireSession, SessionGate } from "@/auth/guards"
 import type { AuthClient } from "@/auth/types"
 
 const Landing = React.lazy(() => import("@/pages/Landing"))
@@ -15,8 +15,9 @@ function Paper() {
 
 export function AppRoutes() {
   return (
-    <React.Suspense fallback={<Paper />}>
-      <Routes>
+    <SessionGate>
+      <React.Suspense fallback={<Paper />}>
+        <Routes>
         <Route path="/" element={<Landing />} />
         <Route
           path="/sign-in"
@@ -35,8 +36,9 @@ export function AppRoutes() {
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </React.Suspense>
+        </Routes>
+      </React.Suspense>
+    </SessionGate>
   )
 }
 

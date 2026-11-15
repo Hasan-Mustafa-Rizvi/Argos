@@ -5,6 +5,9 @@ import { useAuthClient, useSession } from "@/auth/context"
 import { ROLE_NAMES } from "@/auth/types"
 import { ArgosMark } from "@/components/argos/ArgosMark"
 import { ArgosView } from "@/components/argos/ArgosView"
+import { FamilySnapshot } from "@/components/argos/FamilySnapshot"
+import { LiveFrame } from "@/components/argos/LiveFrame"
+import { useLiveFrames } from "@/components/argos/useLiveFrames"
 import { Chip } from "@/components/argos/Chip"
 import { DevControls } from "@/components/argos/DevControls"
 import type { InkState } from "@/components/argos/ink"
@@ -23,8 +26,6 @@ import { IncidentsPlate } from "./IncidentsPlate"
 import { StatePlate } from "./StatePlate"
 import { TimelinePlate } from "./TimelinePlate"
 
-const VIEW_MESSAGE = "The live view opens for signed-in family."
-
 /** The dashboard: everything on it comes from the data source, or is derived from it. */
 export function DashboardScreen() {
   const session = useSession()
@@ -37,12 +38,14 @@ export function DashboardScreen() {
   const [override, setOverride] = React.useState<InkState | null>(null)
   const now = useNow(1000)
   const beat = useBeat(view.device?.last_seen_at)
+  const familyLive = session?.kind === "ready" && session.role === "family"
+  const frames = useLiveFrames(familyLive, familyLive ? session.deviceId : null, now)
 
   React.useEffect(() => {
     document.title = "Dashboard · Argos"
   }, [])
 
-  if (!session) return null
+  if (!session || (session.kind !== "demo" && session.kind !== "ready")) return null
 
   const dataState = displayState(view.device, now)
   const state = override ?? dataState
@@ -50,13 +53,30 @@ export function DashboardScreen() {
   const person = view.device?.person_label ?? ""
   const waiting = waitingIncident(view.incidents)
   const since = offline ? null : stateSince(view.device, view.incidents, view.events)
+  const stoppedFor =
+    frames.phase === "stopped" && frames.receivedAt !== null ? Math.max(0, Math.round((now - frames.receivedAt) / 1000)) : null
   const lastSeen = offline
-    ? view.device
-      ? `Last seen ${formatClock(view.device.last_seen_at)}`
-      : "Argos has not reported yet."
+    ? !view.device || !view.device.last_seen_at
+      ? "Argos has not reported yet."
+      : `Last seen ${formatClock(view.device.last_seen_at)}`
     : undefined
-  const snapshot =
-    view.role === "family" && openIncident(view.incidents)?.snapshot_path ? <SnapshotPlaceholder tone="night" /> : undefined
+  const viewMessage =
+    session.kind === "demo"
+      ? "The live view opens for signed-in family."
+      : session.role === "clinician"
+        ? "The live view is for family."
+        : "The live view is off, or Argos is not sending."
+  const openPath = view.role === "family" ? openIncident(view.incidents)?.snapshot_path : undefined
+  const snapshot = openPath ? (
+    view.source === "live" ? (
+      <FamilySnapshot path={openPath} ink={state} surface="night" />
+    ) : (
+      <SnapshotPlaceholder tone="night" />
+    )
+  ) : undefined
+  const picture = frames.frame ? (
+    <LiveFrame frame={frames.frame} ink={state} live={frames.phase === "live"} stoppedFor={stoppedFor} />
+  ) : undefined
 
   async function signOut() {
     await auth.signOut()
@@ -87,6 +107,12 @@ export function DashboardScreen() {
         </Button>
       </header>
 
+      {view.notice && (
+        <p className="argos-notice" role="status">
+          {view.notice}
+        </p>
+      )}
+
       <div className="argos-dash-meander">
         <Meander beat={beat} flat={state === "offline"} />
       </div>
@@ -101,12 +127,28 @@ export function DashboardScreen() {
         />
 
         <div className="argos-centre">
-          <ArgosView wrapClassName="argos-area-view" message={VIEW_MESSAGE} snapshot={snapshot} lastSeen={lastSeen} />
+          <ArgosView
+            wrapClassName="argos-area-view"
+            message={viewMessage}
+            picture={picture}
+            snapshot={snapshot}
+            lastSeen={lastSeen}
+            faded={frames.phase === "stopped"}
+          />
           {waiting && <AcknowledgeBar className="argos-area-ack" incident={waiting} onAcknowledge={source.acknowledge} />}
         </div>
 
         <TimelinePlate wrapClassName="argos-area-timeline" events={view.events} />
-        <IncidentsPlate wrapClassName="argos-area-incidents" incidents={view.incidents} person={person} />
+        <IncidentsPlate
+          wrapClassName="argos-area-incidents"
+          incidents={view.incidents}
+          person={person}
+          renderSnapshot={
+            view.role === "family" && view.source === "live"
+              ? (path) => <FamilySnapshot path={path} ink={state} surface="paper" />
+              : undefined
+          }
+        />
 
         {view.role === "clinician" ? (
           <ClinicianPlates readings={view.readings} />

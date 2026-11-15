@@ -48,10 +48,12 @@ export interface IncidentsPlateProps {
   incidents: readonly Incident[]
   person: string
   wrapClassName?: string
+  /** Family, live: the stored picture. Absent means the placeholder, which is what the script uses. */
+  renderSnapshot?: (path: string) => React.ReactNode
 }
 
 /** A ledger of checks. Each row opens to its times, how it ended, and its report. */
-export function IncidentsPlate({ incidents, person, wrapClassName }: IncidentsPlateProps) {
+export function IncidentsPlate({ incidents, person, wrapClassName, renderSnapshot }: IncidentsPlateProps) {
   const [open, setOpen] = React.useState<string | null>(null)
   const idBase = React.useId()
 
@@ -101,7 +103,8 @@ export function IncidentsPlate({ incidents, person, wrapClassName }: IncidentsPl
                       )}
                     </dl>
                     {incident.summary && <p className="argos-summary">{printSentence(incident.summary)}</p>}
-                    {incident.snapshot_path && <SnapshotPlaceholder />}
+                    {incident.snapshot_path &&
+                      (renderSnapshot ? renderSnapshot(incident.snapshot_path) : <SnapshotPlaceholder />)}
                   </div>
                 )}
               </li>

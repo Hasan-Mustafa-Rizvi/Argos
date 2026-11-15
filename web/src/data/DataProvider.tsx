@@ -1,13 +1,13 @@
 import * as React from "react"
 
-import type { Session } from "@/auth/types"
+import type { DashboardSession } from "@/auth/types"
 
 import { DataContext } from "./context"
 import { createDataSource } from "./create"
 import type { DataSource } from "./source"
 
 export interface DataProviderProps {
-  session: Session
+  session: DashboardSession
   /** A source to use instead of the one the session would get. */
   source?: DataSource
   children: React.ReactNode

@@ -15,3 +15,9 @@ export function useSession(): Session | null {
   const client = useAuthClient()
   return React.useSyncExternalStore(client.subscribe, client.getSession, client.getSession)
 }
+
+/** False while a stored real session is still being read. */
+export function useAuthReady(): boolean {
+  const client = useAuthClient()
+  return React.useSyncExternalStore(client.subscribe, client.isReady, client.isReady)
+}

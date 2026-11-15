@@ -45,7 +45,9 @@ export interface DashboardHarnessOptions {
 /** The dashboard on a replay that the test drives with fake timers. */
 export function renderDashboard({ role, lines, path = "/dashboard", log = () => {} }: DashboardHarnessOptions) {
   const auth = createDemoAuth(window.sessionStorage)
-  const session = auth.openDemo(role)
+  const opened = auth.openDemo(role)
+  if (opened.kind !== "demo") throw new Error("A demo session was not opened.")
+  const session = opened
   const source = createReplaySource({ role, label: session.label, lines, log })
   const utils = render(
     <MemoryRouter initialEntries={[path]}>

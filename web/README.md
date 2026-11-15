@@ -43,7 +43,9 @@ Copy `.env.example` to `.env.local` to change them.
 
 | Name | Meaning |
 |---|---|
-| `VITE_DATA_MODE` | `replay` plays the scripted run. It is the only mode in this build; any other value logs a note and plays the run. |
+| `VITE_DATA_MODE` | `replay` plays the scripted run. `live` reads the backend, and only when both settings below are set. Any other value, or a live mode with either setting missing, stays on the script. |
+| `VITE_SUPABASE_URL` | Project URL. Publishable. Leave empty to keep the demo. |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Publishable key. Leave empty to keep the demo. |
 
 ## The scripted run
 
