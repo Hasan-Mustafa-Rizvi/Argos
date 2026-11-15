@@ -69,6 +69,9 @@ it through the robot's own software, on the same machine. There is no message fo
 agree for that: the brain's body driver decides what each state looks like, such as where
 the head turns and what the antennas do.
 
+**A pat is a press on the robot's head.** The head can be pushed down by hand. The brain
+senses that from the motors and treats it as an answer during a check.
+
 The brain must run with no body at all, and on a laptop.
 
 ### The optional sensor board: the serial link

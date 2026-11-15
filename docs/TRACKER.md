@@ -78,7 +78,7 @@ Not entering: FaZe Clan, Solana, Tiger Data, MongoDB Atlas, Vultr.
 
 | Account | Needed by | State |
 |---|---|---|
-| GitHub, Netlify | M0, M2 | Ready |
+| GitHub, Netlify | M0, M2 | Ready. Netlify site `argos-watch` created (argos-watch.netlify.app), not yet deployed: link the GitHub repo in its settings with base directory `web`. `argos-live-tracker` is the team tracker page, unrelated. |
 | Supabase | M3 | Ready. Project "Argos". New tables are not exposed to the API unless granted. |
 | Gemini (Google AI Studio) | M5 | To create |
 | ElevenLabs | M5 | To create. One free month of Creator through the coupon bot in the ElevenLabs Discord, using the HackUTA registration email. |

@@ -56,7 +56,8 @@ and what must stay true.
 | Can our line place outbound calls, carry video out, and show our own picture to the person called? | Chert's challenge page says yes to all three for hackathon teams. To be proven on our own line. Calls go only to phones verified with the line. |
 | Which machine runs the Chert connector and the call agent? | A teammate's MacBook. Windows 11 is supported in beta. |
 | What is in the body? | Answered Sat 5:03 PM: a Reachy Mini Lite on the Pi, with its own camera, microphones, speaker and moving head. Contract v0.3. |
-| How does a person give Argos a pat? | Open. The robot has no touch pad. Options: a touch wire on the optional ESP32 board, or pressing an antenna if the robot's software can sense that. |
+| How does a person give Argos a pat? | Answered Sat 6:22 PM: by pressing the robot's head down. The brain senses it from the motors. To be proven on the real robot. |
+| The robot sits on the team's own wheels. Does the brain drive them? | Open. Movement was a stretch goal. Ask what controls the wheels. |
 | Does Chert access last through Sunday afternoon? | Yes if the trial starts after Sat 4 PM: it runs 48 hours. The limit that matters is 50 FaceTime minutes in total, 5 minutes a call. Ask Chert for more if testing eats them. |
 | Email provider | Open. Decided at the escalation milestone. |
 | What the body has: servos, camera, speaker | Open. Waiting on the components list in `progress.md`. |
