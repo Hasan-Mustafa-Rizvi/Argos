@@ -1,6 +1,9 @@
 # Argos contract
 
-Version 0.5 · Sat Nov 14 2026
+Version 0.6 · Sat Nov 14 2026
+
+Changed in 0.6: the wheeled base is specified (section 2): the wiring, and the rules for
+moving. `ARGOS_CALL_AGENT=1` tells the brain that the call agent writes the call events.
 
 Changed in 0.5: escalation is carried by a call agent, a separate part that runs on a laptop
 and learns of incidents from the backend. New event `message_sent`. The call agent may
@@ -87,9 +90,34 @@ the head turns and what the antennas do.
 hand. The brain senses that from the motors, as a part sitting away from where it was told
 to be, and treats it as an answer during a check.
 
-**The base.** The robot rides on four wheels, driven from the same Raspberry Pi. The brain
-decides when to move. How it commands the wheels is not specified yet: it waits on the
-hardware. Everything must work with the wheels switched off.
+**The base.** The robot rides on four fixed wheels with tank steering, driven from the same
+Raspberry Pi: four DC gear motors, two per side, through one L298N driver. There are no
+encoders and no distance sensor. The brain decides when to move, and only the camera tells
+it where the person is.
+
+| L298N pin | Pi pin (BCM) | What it does |
+|---|---|---|
+| IN1, IN2 | GPIO17, GPIO27 | Left side: direction |
+| IN3, IN4 | GPIO22, GPIO23 | Right side: direction |
+| ENA | GPIO12 | Left side: power, by PWM. The jumper on ENA is removed. |
+| ENB | GPIO13 | Right side: power, by PWM. The jumper on ENB is removed. |
+| GND | a Pi GND pin | Common ground. Required. |
+
+The motors have their own battery, not the Pi's. The Pi's pins are 3.3 V.
+
+**Rules for moving, absolute.**
+
+1. Off unless `ARGOS_WHEELS=1`. A missing value means off.
+2. The base moves only while a check is open, only toward a person the camera sees at that
+   moment, slowly, in short bursts, and for no longer than `ARGOS_APPROACH_MAX_S` in total.
+   "At that moment" means a frame taken after the last burst ended and less than half a
+   second old. It never moves in `calm` or in `alert`. One approach per check; none on a
+   check resumed after a restart, none in a scripted run, and none within
+   `ARGOS_APPROACH_REST_S` of the last.
+3. It stops at once when the person is lost from view, when it is close, when the check
+   ends, on the stop key, and when the brain stops for any reason. The pins are held by a
+   separate guard that stops the motors when the brain goes quiet or dies.
+4. Everything works with the wheels switched off, missing or broken.
 
 The brain must run with no body at all, and on a laptop.
 
