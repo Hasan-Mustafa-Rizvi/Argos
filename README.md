@@ -3,6 +3,8 @@
 A companion robot dog that keeps watch over someone who is recovering, elderly, or needs
 looking after, and sends word when something is wrong.
 
+The dashboard is live at https://argos-watch.netlify.app.
+
 Built at HackUTA 2026. The theme is Homer's Odyssey. Argos is the dog who kept watch for
 twenty years and was the first to recognize Odysseus when he came home.
 
@@ -24,8 +26,7 @@ signed-in family, and an image is stored only after a check has failed.
 |---|---|
 | `contract/` | The agreed messages and records between the parts, with a scripted demo run |
 | `web/` | The dashboard |
-| `brain/` | The program on the laptop: detection, voice, escalation |
-| `firmware/` | The ESP32 code for the dog's body |
+| `brain/` | The brain: the program on the robot's Raspberry Pi that detects, speaks, moves the robot and records |
 | `supabase/` | Database schema and access rules |
 | `design/` | Visual identity, logo and the web build plan |
 | `docs/` | Architecture and the build tracker |

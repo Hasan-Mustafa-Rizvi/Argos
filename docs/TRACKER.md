@@ -1,7 +1,7 @@
 # Argos software tracker
 
-**Last updated:** Sat Nov 14 2026, 7:20 PM CT
-**Status:** Web A is reviewed and committed. Contract v0.3: the body is a Reachy Mini Lite. Brain A prompt is ready to run.
+**Last updated:** Sat Nov 14 2026, 8:15 PM CT
+**Status:** The dashboard is live on demo data. The brain is built and reviewed but untried on real hardware. Next: the dashboard on live data (W3), then the FaceTime call agent (M6). The wheels wait on the hardware team's answers.
 
 Hasan owns all software. This file records where the software is. Coding agents never edit it.
 
@@ -10,14 +10,15 @@ Hasan owns all software. This file records where the software is. Coding agents 
 | # | Milestone | Lane | State | Waiting on |
 |---|---|---|---|---|
 | M0 | Repo layout, ignore rules, agent rules, docs | root | Done | |
-| M1 | Contract v0.3 and scripted demo run | `contract/` | Done | |
+| M1 | Contract v0.4 and scripted demo run | `contract/` | Done | |
 | W1 | Web shell: tokens, landing, sign-in, logo reveal, empty dashboard frame | `web/` | Done, reviewed, committed | |
 | W2 | Dashboard on replay data | `web/` | Done, reviewed, committed, deployed. | |
 | M3 | Schema, access rules, second factor, live updates, live view channel | `supabase/` | Applied and tested. Three dashboard switches and the first account are Hasan's. | |
-| W3 | Dashboard reads live data, real sign-in with second factor, live view, keeps replay mode | `web/` | Not started | W2, M3 |
+| W3 | Dashboard reads live data, real sign-in with second factor, live view, keeps replay mode | `web/` | Next. Prompt being written. | |
 | M5 | Brain: core, robot body language, then detection, voice and live view frames | `brain/` | Built, reviewed, committed. Nothing tried on real hardware or with real keys yet. | The robot, the Pi, keys |
-| M6 | Escalation: FaceTime call and email, dry-run by default | `brain/` | Not started | Chert answers |
-| M7 | Firmware for the optional sensor board | `firmware/` | Not needed unless the team wants the touch pad or room temperature | |
+| M6 | Escalation: the FaceTime call agent (Chert, LiveKit, ElevenLabs voice, Gemini on what it sees), and the backup email | its own lane | Not started | An iPhone, a LiveKit account, the Chert trial |
+| M8 | The brain drives the wheels: a short approach to the person during a check. Also the head press as a pat. | `brain/` | Not started | The hardware team's answers; the wheels being printed |
+| M7 | Firmware | none | Dropped. There is no ESP32 in the robot. | |
 
 ## Decisions
 
@@ -40,6 +41,11 @@ Hasan owns all software. This file records where the software is. Coding agents 
 | Sat 3:50 PM | **The centre of the dashboard is the live view from the dog's camera** | Hasan's call. The dashboard is only for signed-in people, so the feed is protected by sign-in and a second factor. |
 | Sat 3:50 PM | The live view is never stored, needs a second factor, goes to family accounts only, and is off unless switched on | Keeps the stored-image rule intact and keeps the family and clinician split consistent: clinicians already do not see images. |
 | Sat 3:50 PM | Demo sessions play the scripted run and never get live records or the live view | The demo buttons are public. Nothing real should be one tap away from a stranger. |
+| Sat 6:28 PM | One Raspberry Pi 5 runs the whole robot: a Reachy Mini Lite on a four-wheeled base. No ESP32. | The hardware team's build. |
+| Sat 6:28 PM | The brain will drive the wheels, as a short camera-guided approach during a check, off unless switched on | Hasan wants the robot to go to the person. Kept small and switchable because robustness is scored and the wheels do not exist yet. |
+| Sat 6:35 PM | The sign-in plate is the night watch: the hound over a wave-scroll sea under the Dog Star, with ΑΡΓΟΣ | Hasan chose it from three drawings. |
+| Sat 7:55 PM | The dashboard is deployed at argos-watch.netlify.app and redeploys on every push | Hasan linked the repo. |
+| Sat 8:00 PM | The call agent runs on Hasan's Windows laptop, WSL2 first | Nobody on the team has macOS. The agent reads from the backend, so it need not sit with the robot. |
 | Sat 5:03 PM | The body is a Reachy Mini Lite on the Pi: camera, microphones, speaker, moving head (team's call). The ESP32 becomes an optional sensor board. | The robot already has every sense the brain needs. Contract v0.3. |
 | Sat 6:00 PM | One art language: line engraving. The dithered hills go. Sign-in gets the mark as an engraved plate; the dashboard ends with a wave scroll band; the reveal is cut to about 1.5 s and made gentle; no em dashes anywhere. | Hasan's review of the built site. The hills were pixel texture beside engraved line, so they read as foreign. |
 | Sat 5:35 PM | The reveal's brighter blue while the glass holds the mark stays as it is | It lasts about two seconds, is part of the glass effect, and settles to cobalt. Not worth another edit to a copied file. Hasan can overrule after seeing it. |
@@ -80,23 +86,35 @@ Not entering: FaZe Clan, Solana, Tiger Data, MongoDB Atlas, Vultr.
 |---|---|---|
 | GitHub, Netlify | M0, M2 | Ready. The dashboard is live at https://argos-watch.netlify.app, linked to the GitHub repo, so every push to `main` deploys. `argos-live-tracker` is the team tracker page, unrelated. |
 | Supabase | M3 | Ready. Project "Argos". New tables are not exposed to the API unless granted. |
-| Gemini (Google AI Studio) | M5 | To create |
+| Gemini (Google AI Studio) | M5 | To create. Use a paid-tier key: on the free tier the frames sent may be used by Google and seen by reviewers. |
 | ElevenLabs | M5 | To create. One free month of Creator through the coupon bot in the ElevenLabs Discord, using the HackUTA registration email. |
 | Chert | M6 | Start the free trial when we are ready to build M6, not before: it gives one line, 48 hours and 50 FaceTime minutes in total, with calls capped at 5 minutes. Needs an iPhone to verify. |
 | LiveKit Cloud | M6 | To create. Chert connects FaceTime to a LiveKit room that we own. |
+| An iPhone | M6 | Missing. Nobody on the team has one to hand. Needed to verify the Chert line and for calls. |
 | Email sender | M6 | To choose |
 | Devpost | Sat midnight | To create |
 
-## Open decisions
+## Open items
 
-- None open. Argos's view was decided at 3:50 PM: it is the live view. See contract section 6.
+With Hasan:
+- An iPhone for the FaceTime prize. See `docs/SPEC.md`, open questions.
+- Gemini key: paid tier, or change the privacy wording.
+- Claim the ElevenLabs coupon; create the Gemini and LiveKit accounts.
+- Create the Devpost page before Saturday midnight. What that first submission must contain is unconfirmed.
 
-## Backlog and known limits
+With Neel and Farrell:
+- The twelve hardware questions sent Sat 6:49 PM.
+- What the landing page should say each of them did. It says "Hardware and the dog's body" for both.
 
-- The Chert integration is unresearched. It is the least certain part of the plan.
-- Demo sessions are open to anyone with the link while the event runs. They see the scripted run only.
-- The live view over the venue network is untested. Test early on Sunday.
-- A manual override was mentioned by Hasan as a possible later addition. Not specified yet.
+## Known limits
+
+- Nothing in `brain/` has run on the real Pi, robot, camera, microphone or speaker, or against the real backend or real keys.
+- The pat the brain senses today is a press on an antenna, not on the head.
+- The dashboard shows demo data only. Real sign-in is not built, so nobody can see live records yet.
+- The live view over the venue network is untested.
+- The Chert connector is untested on Windows and on WSL2.
+- Demo sessions are open to anyone with the link. They see the scripted run only.
+- A manual override was mentioned by Hasan as a possible later addition. Not specified.
 
 ## Log
 

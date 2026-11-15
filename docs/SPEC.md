@@ -6,24 +6,29 @@ and what must stay true.
 ## The parts
 
 ```
- Reachy Mini Lite            Raspberry Pi 5: the brain (Python)      Backend (Supabase)
- head, antennas,     USB     state machine                   HTTPS   devices, incidents,
- camera, microphones, ─────▶ fall, stillness and voice detection ──▶ events, readings,
- speaker             ◀─────  spoken lines (ElevenLabs)               snapshot storage,
-                             Gemini check on one frame               sign-in and access rules
- Optional sensor      USB    live view frames                            │ live updates
- board (ESP32):      ──────▶ escalation                                  ▼
- temperature, tilt,  serial                                          Dashboard (web/)
- touch pad                   Call agent (MacBook): FaceTime          family view, clinician view
-                             through Chert and LiveKit
+ The robot                    Raspberry Pi 5: the brain (Python)      Backend (Supabase)
+ Reachy Mini Lite:    USB     state machine                   HTTPS   devices, incidents,
+ head, antennas,     ──────▶  fall, stillness and voice detection ──▶ events, readings,
+ camera, microphones, ◀─────  spoken lines (ElevenLabs)               snapshot storage,
+ speaker                      Gemini check on one frame               sign-in and access rules
+                              live view frames                            │ live updates
+ Four-wheeled base   ◀─────   escalation                                  ▼
+ (built by the                wheel commands (not built yet)          Dashboard (web/)
+ hardware team)                                                       https://argos-watch.netlify.app
+                                                                      family view, clinician view
+ Call agent: FaceTime through Chert and LiveKit. Runs on a laptop, reads incidents and the
+ live view from the backend. Not built yet.
 ```
 
-- **The Raspberry Pi is the brain.** The same program runs on a laptop for development and as
-  the fallback. The robot only moves, sees, hears and speaks.
+- **One Raspberry Pi 5 runs everything on the robot.** There is no second board. The same
+  brain program runs on a laptop for development and as the fallback.
 - **The brain owns the state machine** in section 1 of the contract. The body shows the
   state. The dashboard displays it. Neither decides it.
 - **The brain is the only writer** to the backend. The dashboard reads, and makes exactly
   one write: acknowledging an escalated incident.
+- **The brain decides when the robot moves.** Movement is a short, slow approach toward the
+  person during a check, guided by the camera, with a time limit and a stop. It is off
+  unless switched on, and everything works without it.
 
 ## What must stay true
 
@@ -42,7 +47,8 @@ and what must stay true.
 | Failure | What happens |
 |---|---|
 | Venue network drops | Dashboard switches to replay mode. Brain keeps running and logs locally. |
-| Dog's body unplugged | Brain carries on with voice and escalation only. |
+| The robot is unplugged or its software is not running | Brain carries on with the machine's own camera, microphone and speaker. |
+| The wheels are missing, off or stuck | The robot asks from where it stands. Nothing else changes. |
 | Microphone useless in the noise | Manual trigger starts the check. A pat stands it down. |
 | FaceTime call fails | `call_failed` is logged. Email and the dashboard still carry the alert. |
 | Camera detection misfires | The check exists for this. "I'm fine" or a pat stands it down. |
@@ -52,14 +58,14 @@ and what must stay true.
 
 | Question | Status |
 |---|---|
-| How does our code reach a FaceTime call through Chert? | Answered from their docs, Sat 4:45 PM. Chert bridges a FaceTime line into a LiveKit room. Our agent joins that room, hears the person and speaks. See the tracker log. |
-| Can our line place outbound calls, carry video out, and show our own picture to the person called? | Chert's challenge page says yes to all three for hackathon teams. To be proven on our own line. Calls go only to phones verified with the line. |
-| Which machine runs the Chert connector and the call agent? | A teammate's MacBook. Windows 11 is supported in beta. |
-| What is in the body? | Answered Sat 5:03 PM: a Reachy Mini Lite on the Pi, with its own camera, microphones, speaker and moving head. Contract v0.3. |
-| How does a person give Argos a pat? | Answered Sat 6:22 PM: by pressing the robot's head down. The brain senses it from the motors. To be proven on the real robot. |
-| The robot sits on the team's own wheels. Does the brain drive them? | Open. Movement was a stretch goal. Ask what controls the wheels. |
-| Does Chert access last through Sunday afternoon? | Yes if the trial starts after Sat 4 PM: it runs 48 hours. The limit that matters is 50 FaceTime minutes in total, 5 minutes a call. Ask Chert for more if testing eats them. |
-| Email provider | Open. Decided at the escalation milestone. |
-| What the body has: servos, camera, speaker | Open. Waiting on the components list in `progress.md`. |
-| Demo sessions are open to anyone with the link during the event | Accepted. A demo session plays the scripted run only and never receives live records or the live view. |
+| The wheels: which motors, how they are wired to the Pi, what powers them, any feedback sensors, any existing test code | Open. Twelve questions sent to Neel and Farrell, Sat 6:49 PM. The wheel code waits on answers 1, 2, 3 and 7. |
+| Power: battery or wall power, and how far can the robot roll | Open. Part of the questions above. It decides whether the robot can move at all. |
+| Is there an iPhone for the FaceTime prize? | Open, and the team has none right now. Chert requires one to verify the line and for calls. Options: the judge's own phone at judging, a borrowed iPhone for setup and tests, and building the agent against a LiveKit room in a browser so no iPhone is needed until the last step. Ask Chert. |
+| Which machine runs the Chert connector and the call agent? | Hasan's Windows laptop, inside WSL2 first, native Windows second, the Pi third. Nobody on the team has macOS. Untested. |
+| Does a press on the head read cleanly from the motors? | Open. The brain so far senses a press on an antenna. The head press is in the next brain prompt. To be proven on the real robot. |
+| Does the brain run on the real Pi with the real robot, camera, microphones and speaker? | Open. Nothing has been tried on real hardware or with real keys. |
+| Gemini free tier may use the frames it is sent and show them to reviewers | Open. Hasan to decide: a paid-tier key, or change the privacy wording. |
+| Does Chert access last through Sunday afternoon? | Yes if the trial starts after Sat 4 PM: it runs 48 hours. The limit that matters is 50 FaceTime minutes in total, 5 minutes a call. |
 | Does the venue network carry the live view at 4 frames a second? | Open. Test early on Sunday. The frame rate drops through `LIVE_VIEW_FPS`. |
+| Email provider for the backup email | Open. Decided when escalation is built. |
+| Demo sessions are open to anyone with the link during the event | Accepted. A demo session plays the scripted run only and never receives live records or the live view. |
