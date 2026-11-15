@@ -12,7 +12,7 @@ Hasan owns all software. This file records where the software is. Coding agents 
 | M0 | Repo layout, ignore rules, agent rules, docs | root | Done | |
 | M1 | Contract v0.3 and scripted demo run | `contract/` | Done | |
 | W1 | Web shell: tokens, landing, sign-in, logo reveal, empty dashboard frame | `web/` | Done, reviewed, committed | |
-| W2 | Dashboard on replay data | `web/` | Done, reviewed, committed. Polish pass committed (`67d8fea`). Not yet deployed. | |
+| W2 | Dashboard on replay data | `web/` | Done, reviewed, committed, deployed. | |
 | M3 | Schema, access rules, second factor, live updates, live view channel | `supabase/` | Applied and tested. Three dashboard switches and the first account are Hasan's. | |
 | W3 | Dashboard reads live data, real sign-in with second factor, live view, keeps replay mode | `web/` | Not started | W2, M3 |
 | M5 | Brain: core, robot body language, then detection, voice and live view frames | `brain/` | Built, reviewed, committed. Nothing tried on real hardware or with real keys yet. | The robot, the Pi, keys |
@@ -78,7 +78,7 @@ Not entering: FaZe Clan, Solana, Tiger Data, MongoDB Atlas, Vultr.
 
 | Account | Needed by | State |
 |---|---|---|
-| GitHub, Netlify | M0, M2 | Ready. Netlify site `argos-watch` created (argos-watch.netlify.app), not yet deployed: link the GitHub repo in its settings with base directory `web`. `argos-live-tracker` is the team tracker page, unrelated. |
+| GitHub, Netlify | M0, M2 | Ready. The dashboard is live at https://argos-watch.netlify.app, linked to the GitHub repo, so every push to `main` deploys. `argos-live-tracker` is the team tracker page, unrelated. |
 | Supabase | M3 | Ready. Project "Argos". New tables are not exposed to the API unless granted. |
 | Gemini (Google AI Studio) | M5 | To create |
 | ElevenLabs | M5 | To create. One free month of Creator through the coupon bot in the ElevenLabs Discord, using the HackUTA registration email. |
