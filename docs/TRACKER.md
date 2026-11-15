@@ -1,7 +1,7 @@
 # Argos software tracker
 
 **Last updated:** Sat Nov 14 2026, 8:15 PM CT
-**Status:** The dashboard is live on demo data. The brain is built and reviewed but untried on real hardware. The Chert trial is running and a phone is verified. Next: the dashboard on live data (W3, prompt written), then the FaceTime call agent (M6). The wheels wait on the hardware team's answers.
+**Status:** The dashboard signs in for real and reads live records. The brain is built and reviewed but untried on real hardware. The Chert trial is running and a phone is verified. The dashboard is live on real accounts. Next: the FaceTime call agent (M6), then the first run of the brain on the robot. The wheels wait on the hardware team's answers.
 
 Hasan owns all software. This file records where the software is. Coding agents never edit it.
 
@@ -14,9 +14,9 @@ Hasan owns all software. This file records where the software is. Coding agents 
 | W1 | Web shell: tokens, landing, sign-in, logo reveal, empty dashboard frame | `web/` | Done, reviewed, committed | |
 | W2 | Dashboard on replay data | `web/` | Done, reviewed, committed, deployed. | |
 | M3 | Schema, access rules, second factor, live updates, live view channel | `supabase/` | Applied and tested. Three dashboard switches and the first account are Hasan's. | |
-| W3 | Dashboard reads live data, real sign-in with second factor, live view, keeps replay mode | `web/` | Next. Prompt being written. | |
+| W3 | Dashboard reads live data, real sign-in with second factor, live view, keeps replay mode | `web/` | Built and reviewed. Proven on the real backend: sign-in, authenticator setup, live records, the acknowledge write. The live picture and the snapshot are unseen until the brain runs with a camera. | |
 | M5 | Brain: core, robot body language, then detection, voice and live view frames | `brain/` | Built, reviewed, committed. Nothing tried on real hardware or with real keys yet. | The robot, the Pi, keys |
-| M6 | Escalation: the FaceTime call agent (Chert, LiveKit, ElevenLabs voice, Gemini on what it sees), and the backup email | its own lane | Not started | An iPhone, a LiveKit account, the Chert trial |
+| M6 | Escalation: an iMessage, then the FaceTime video call agent (Chert, LiveKit, ElevenLabs voice, Gemini on what it sees). Queue and retry on a busy line. The backup email only if there is time. | its own lane | Next. Prompt to write. | A LiveKit account |
 | M8 | The brain drives the wheels: a short approach to the person during a check. Also the head press as a pat. | `brain/` | Not started | The hardware team's answers; the wheels being printed |
 | M7 | Firmware | none | Dropped. There is no ESP32 in the robot. | |
 
@@ -111,7 +111,7 @@ With Neel and Farrell:
 
 - Nothing in `brain/` has run on the real Pi, robot, camera, microphone or speaker, or against the real backend or real keys.
 - The pat the brain senses today is a press on an antenna, not on the head.
-- The dashboard shows demo data only. Real sign-in is not built, so nobody can see live records yet.
+- The dashboard's live picture and stored snapshot have never been seen with a real camera. Everything else on it has been seen against the real backend.
 - The live view over the venue network is untested.
 - The Chert sign-up tool ran on Windows with Node 24. The connector that carries a call is still untested on Windows and on WSL2, and no FaceTime call has been placed yet: the demo call never got through a busy line.
 - Whether a phone that joined by the join code can receive a call from the agent, not only place one, is unconfirmed.
@@ -119,6 +119,21 @@ With Neel and Farrell:
 - A manual override was mentioned by Hasan as a possible later addition. Not specified.
 
 ## Log
+
+### Sat Nov 14, 9:20 PM
+Web B built by Cursor, rebuilt from a clean copy and reviewed: 93 tests, build and type
+check pass, lint 0 errors. Then tried for real with Hasan's account: password, authenticator
+setup, wrong codes refused, the right one accepted, the dashboard as Family. Played the brain
+from the database: a heartbeat and two test alerts arrived without a refresh, both were
+acknowledged from the dashboard as "Hasan", and the page went offline 15 seconds after the
+last heartbeat. Netlify now has the three settings, so the live site signs in for real.
+The second agent's review of the prompt caught three faults that the tests would have
+missed; the records channel rule added to the database was one of them.
+
+Chert: outbound FaceTime video is now on for HackUTA projects. Teams share a line during
+judging, and Chert says a busy line will not cost points. Plan: record one good call ahead
+of judging. GoDaddy's best domain name prize: Hasan is claiming a name; it will point at the
+Netlify site.
 
 ### Sat Nov 14, 7:50 PM
 Chert onboarding done from a scratch folder outside the repo, with a friend's iPhone. The
