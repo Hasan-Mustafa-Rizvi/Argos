@@ -145,6 +145,7 @@ which is kept in `logo/source/`.
 | `argos-lockup.svg` | Emblem and wordmark side by side. Headers. |
 | `argos-lockup-stacked.svg` | Emblem, wordmark and the line "Guardian & Assistant". Landing, sign-in. |
 | `argos-mark-cobalt.svg` | Fixed cobalt, for places that cannot read CSS colour. |
+| `argos-hound.svg` | The hound alone, lifted out of its ring, for scenes such as the sign-in plate. |
 
 All but the last take their colour from `currentColor`, so the mark reprints with the state
 like everything else. It is never gold on charcoal in the product: it is ink on paper, or
@@ -182,9 +183,13 @@ each section label is removed, and the team is shown as plain cards.
 
 ### Sign-in, `/sign-in`
 
-The split layout from the sign-in reference. Left: the form on paper. Right: an engraved
-plate on the night colour: the Argos mark very large and cropped by the panel's edges,
-inside a Greek key border.
+The split layout from the sign-in reference. Left: the form on paper. Right, on the night
+colour: the night watch plate, `plates/signin-night-watch.svg`. The hound keeps watch over
+a wave-scroll sea under a crescent moon and the constellation of the Great Dog, with its Dog
+Star drawn largest, inside a Greek key frame, with ΑΡΓΟΣ beneath. It is shown whole, at its
+own proportions, never cropped and never stretched. On a phone the short version,
+`plates/signin-night-watch-band.svg`, sits above the form. Both take their line colour from
+`currentColor`.
 
 - The email and password form is for real accounts, which also need a second factor.
 - Two buttons open the demo: "Open the demo as family" and "Open the demo as clinician".
