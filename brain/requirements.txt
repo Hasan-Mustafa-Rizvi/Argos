@@ -1,0 +1,17 @@
+# Runtime. Python 3.12. Every package here installs from a wheel on Windows x86_64 and on
+# Raspberry Pi OS 64-bit (aarch64). See README.md for the two system packages the Pi needs.
+#
+# Stage 1: backend writes, settings, the sensor board.
+httpx==0.28.1
+certifi==2026.10.23
+python-dotenv==1.2.4
+pyserial==3.5
+# Stage 2: camera, pose, listening, audio, Gemini.
+numpy==2.5.4
+# mediapipe requires the contrib build of OpenCV. Do not add opencv-python-headless next to it:
+# both write the same cv2 package.
+opencv-contrib-python==5.0.0.93
+mediapipe==1.2.3
+vosk==0.3.45
+sounddevice==0.5.6
+google-genai==3.3.0

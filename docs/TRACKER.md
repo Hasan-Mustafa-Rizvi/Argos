@@ -1,6 +1,6 @@
 # Argos software tracker
 
-**Last updated:** Sat Nov 14 2026, 6:05 PM CT
+**Last updated:** Sat Nov 14 2026, 7:20 PM CT
 **Status:** Web A is reviewed and committed. Contract v0.3: the body is a Reachy Mini Lite. Brain A prompt is ready to run.
 
 Hasan owns all software. This file records where the software is. Coding agents never edit it.
@@ -15,7 +15,7 @@ Hasan owns all software. This file records where the software is. Coding agents 
 | W2 | Dashboard on replay data | `web/` | Done, reviewed, committed. Polish pass committed (`67d8fea`). Not yet deployed. | |
 | M3 | Schema, access rules, second factor, live updates, live view channel | `supabase/` | Applied and tested. Three dashboard switches and the first account are Hasan's. | |
 | W3 | Dashboard reads live data, real sign-in with second factor, live view, keeps replay mode | `web/` | Not started | W2, M3 |
-| M5 | Brain: core, robot body language, then detection, voice and live view frames | `brain/` | Prompt ready | |
+| M5 | Brain: core, robot body language, then detection, voice and live view frames | `brain/` | Built, reviewed, committed. Nothing tried on real hardware or with real keys yet. | The robot, the Pi, keys |
 | M6 | Escalation: FaceTime call and email, dry-run by default | `brain/` | Not started | Chert answers |
 | M7 | Firmware for the optional sensor board | `firmware/` | Not needed unless the team wants the touch pad or room temperature | |
 
@@ -99,6 +99,30 @@ Not entering: FaZe Clan, Solana, Tiger Data, MongoDB Atlas, Vultr.
 - A manual override was mentioned by Hasan as a possible later addition. Not specified yet.
 
 ## Log
+
+### Sat Nov 14, 7:20 PM
+Reviewed Brain A. Verified from a clean copy with its pinned dependencies on Python 3.12:
+180 of 180 tests pass, the linter is clean. Read the privacy code: a summary or snapshot
+path can only be written to an incident the brain itself escalated, and the write is
+filtered on the incident's status; the live view goes to Realtime's own endpoint as a
+private broadcast and nowhere else; contact details are never read. Scanned for keys and
+contact details: none. Committed.
+
+Choices the coding agent made that matter later: the brain drives the robot through the
+robot daemon's HTTP interface and opens the camera and audio itself, so the robot's own
+software needs no compiler on the Pi beyond its documented install; fall detection is
+MediaPipe pose with two plain rules; listening is Vosk with a fixed phrase list; the pat
+it built is a press on an antenna.
+
+Not done on any real thing: robot, Pi, camera, microphone, speaker, Supabase, Gemini,
+ElevenLabs. The coding agent ran `git status` once, read-only, and said so.
+
+Hardware as now understood: one Raspberry Pi 5 runs everything. Reachy Mini Lite on a base
+with four wheels. No ESP32. The team wants the robot to drive to the person. Questions sent
+to the hardware teammates through Hasan.
+
+Open risk raised by the coding agent: on Gemini's free tier, frames sent for the check may
+be used by Google and seen by reviewers, which would make "sent, not stored" untrue.
 
 ### Sat Nov 14, 6:05 PM
 Reviewed the polish pass (Web A2). Verified from a clean copy: 65 of 65 tests, build passes,

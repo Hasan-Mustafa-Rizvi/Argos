@@ -1,0 +1,20 @@
+# The Argos brain, started at boot on the Raspberry Pi. A user service; see
+# reachy-mini-daemon.service for how to install both.
+#
+# A service has no terminal, so the keys are off. For the demo, when the keys are wanted,
+# stop this service and run the brain in a terminal over SSH instead (see brain/README.md).
+# Settings come from brain/.env. Assumes the repo is at ~/ARGOS.
+
+[Unit]
+Description=Argos brain
+Wants=reachy-mini-daemon.service
+After=reachy-mini-daemon.service network-online.target
+
+[Service]
+WorkingDirectory=%h/ARGOS/brain
+ExecStart=%h/ARGOS/brain/.venv/bin/python -m argos --no-keys
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

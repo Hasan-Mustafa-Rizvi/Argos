@@ -1,6 +1,11 @@
 # Argos contract
 
-Version 0.3 · Sat Nov 14 2026
+Version 0.4 · Sat Nov 14 2026
+
+Changed in 0.4: a pat may be a press on the head or on an antenna. `asked` may say that the
+line was not spoken. The brain may acknowledge from its own keyboard. The robot sits on a
+wheeled base that the brain will drive: that interface is not written yet. No record changed
+shape.
 
 Changed in 0.3: the body is a Reachy Mini Lite driven by the brain on a Raspberry Pi 5, and
 the serial link in section 2 is now an optional sensor board. `last_seen_at` may be null.
@@ -69,8 +74,13 @@ it through the robot's own software, on the same machine. There is no message fo
 agree for that: the brain's body driver decides what each state looks like, such as where
 the head turns and what the antennas do.
 
-**A pat is a press on the robot's head.** The head can be pushed down by hand. The brain
-senses that from the motors and treats it as an answer during a check.
+**A pat is a press on the robot's head or on one of its antennas.** Both can be pushed by
+hand. The brain senses that from the motors, as a part sitting away from where it was told
+to be, and treats it as an answer during a check.
+
+**The base.** The robot rides on four wheels, driven from the same Raspberry Pi. The brain
+decides when to move. How it commands the wheels is not specified yet: it waits on the
+hardware. Everything must work with the wheels switched off.
 
 The brain must run with no body at all, and on a laptop.
 
@@ -171,7 +181,7 @@ rule is about what is stored. The live view in section 6 is never stored at all.
 |---|---|
 | `device_online` | `{}` |
 | `trigger` | `{"trigger": "...", "confidence": 0.91}` |
-| `asked` | `{"said": "Are you okay?"}` |
+| `asked` | `{"said": "Are you okay?"}`. May carry `"spoken": false` when no voice was available and only a beep went out. |
 | `heard` | `{"said": "I'm fine"}` |
 | `pat` | `{}` |
 | `stood_down` | `{"by": "voice"}` |
@@ -224,7 +234,8 @@ There is no anonymous access. Everyone signs in. There are two kinds of session:
 **The one write the dashboard makes:** acknowledging an escalated incident. It sets `status`
 to `acknowledged` and fills `acknowledged_by` and `acknowledged_at`. The brain then sets
 `ended_at`, records the `acknowledged` event and returns the device to `calm`. The
-dashboard writes nothing else.
+dashboard writes nothing else. The brain may make the same acknowledgement itself from its
+own keyboard, for a demo with no network, with the label "Demo".
 
 ---
 
