@@ -1,7 +1,7 @@
 # Argos software tracker
 
 **Last updated:** Sat Nov 14 2026, 8:15 PM CT
-**Status:** The dashboard is live on demo data. The brain is built and reviewed but untried on real hardware. Next: the dashboard on live data (W3), then the FaceTime call agent (M6). The wheels wait on the hardware team's answers.
+**Status:** The dashboard is live on demo data. The brain is built and reviewed but untried on real hardware. The Chert trial is running and a phone is verified. Next: the dashboard on live data (W3, prompt written), then the FaceTime call agent (M6). The wheels wait on the hardware team's answers.
 
 Hasan owns all software. This file records where the software is. Coding agents never edit it.
 
@@ -88,16 +88,17 @@ Not entering: FaZe Clan, Solana, Tiger Data, MongoDB Atlas, Vultr.
 | Supabase | M3 | Ready. Project "Argos". New tables are not exposed to the API unless granted. |
 | Gemini (Google AI Studio) | M5 | To create. Use a paid-tier key: on the free tier the frames sent may be used by Google and seen by reviewers. |
 | ElevenLabs | M5 | To create. One free month of Creator through the coupon bot in the ElevenLabs Discord, using the HackUTA registration email. |
-| Chert | M6 | Start the free trial when we are ready to build M6, not before: it gives one line, 48 hours and 50 FaceTime minutes in total, with calls capped at 5 minutes. Needs an iPhone to verify. |
+| Chert | M6 | Trial started Sat Nov 14, about 7:35 PM, on Hasan's account. A friend's iPhone is verified for the project. 50 FaceTime minutes in total, 5 minutes a call. The tool says the trial lasts 24 hours and the web guide says 48: check the billing page. The line is shared and takes one call at a time; it was busy three times in a row on Saturday evening. With no agent connected the line is released after 3 hours (15 minutes when busy); running onboarding again gives a line with the minutes kept, and the number may change. A join code lets any iPhone join the project by sending one text. The sign-in lives in Hasan's user profile and a scratch folder `C:\Projects\argos-call`, outside this repo. |
 | LiveKit Cloud | M6 | To create. Chert connects FaceTime to a LiveKit room that we own. |
-| An iPhone | M6 | Missing. Nobody on the team has one to hand. Needed to verify the Chert line and for calls. |
+| An iPhone | M6 | A friend's, verified. He takes one or two test calls and comes to judging on Sunday at 1 PM. The join code is the fallback for any other iPhone, the judge's included. |
 | Email sender | M6 | To choose |
 | Devpost | Sat midnight | To create |
 
 ## Open items
 
 With Hasan:
-- An iPhone for the FaceTime prize. See `docs/SPEC.md`, open questions.
+- Chert: read the trial's end time off the billing page. Watch the Chert Discord for the answer on busy shared lines during judging. Keep the join code private.
+- Sunday morning: run onboarding again if the line was released, then the friend sends one text to the line's number.
 - Gemini key: paid tier, or change the privacy wording.
 - Claim the ElevenLabs coupon; create the Gemini and LiveKit accounts.
 - Create the Devpost page before Saturday midnight. What that first submission must contain is unconfirmed.
@@ -112,11 +113,26 @@ With Neel and Farrell:
 - The pat the brain senses today is a press on an antenna, not on the head.
 - The dashboard shows demo data only. Real sign-in is not built, so nobody can see live records yet.
 - The live view over the venue network is untested.
-- The Chert connector is untested on Windows and on WSL2.
+- The Chert sign-up tool ran on Windows with Node 24. The connector that carries a call is still untested on Windows and on WSL2, and no FaceTime call has been placed yet: the demo call never got through a busy line.
+- Whether a phone that joined by the join code can receive a call from the agent, not only place one, is unconfirmed.
 - Demo sessions are open to anyone with the link. They see the scripted run only.
 - A manual override was mentioned by Hasan as a possible later addition. Not specified.
 
 ## Log
+
+### Sat Nov 14, 7:50 PM
+Chert onboarding done from a scratch folder outside the repo, with a friend's iPhone. The
+phone verified on the first try. The demo call never happened: the shared line was busy for
+three attempts, so onboarding was finished with the demo skipped. What that taught us: the
+trial line is shared between projects and carries one call at a time, so a busy line at
+judging is a real risk. The call agent must ask to queue, retry, and fall back to the email.
+Asked Chert in their Discord whether teams share a line during the live demos. Found a join
+code: one text from any iPhone joins the project, which removes the dependence on one phone.
+
+Wrote the Web B prompt (real sign-in with a second factor, live records, the acknowledge
+write, the live view, the snapshot). Contract 0.4.1: once the live view has stopped, the
+reader forgets the last `seq`, so a restarted brain is picked up at once. The dashboard's
+key setting is now named `VITE_SUPABASE_PUBLISHABLE_KEY`.
 
 ### Sat Nov 14, 7:20 PM
 Reviewed Brain A. Verified from a clean copy with its pinned dependencies on Python 3.12:

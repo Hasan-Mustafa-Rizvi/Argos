@@ -161,6 +161,22 @@ create policy "family with second factor watch the live view" on realtime.messag
                   and 'view:' || m.device_id::text = (select realtime.topic()))
   );
 
+-- ---------------------------------------------------------------- the records channel
+-- Public Realtime access is off, so the dashboard listens for record changes on a private
+-- channel, and joining a private channel needs a policy that names its topic.
+-- Topic: records:<device id>. Members with a second factor may join. Nobody may send.
+-- What arrives on it is still decided by the row policies on each table.
+
+create policy "members with second factor join their records channel" on realtime.messages
+  for select to authenticated
+  using (
+    realtime.messages.extension = 'broadcast'
+    and (select auth.jwt() ->> 'aal') = 'aal2'
+    and exists (select 1 from public.members m
+                where m.user_id = (select auth.uid())
+                  and 'records:' || m.device_id::text = (select realtime.topic()))
+  );
+
 -- ---------------------------------------------------------------- snapshots
 -- One still image per escalated incident, at incidents/<incident id>/snapshot.jpg in a
 -- private bucket. Family with a second factor may read. The brain writes with the secret key.

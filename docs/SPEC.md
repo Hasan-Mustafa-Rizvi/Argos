@@ -60,12 +60,12 @@ and what must stay true.
 |---|---|
 | The wheels: which motors, how they are wired to the Pi, what powers them, any feedback sensors, any existing test code | Open. Twelve questions sent to Neel and Farrell, Sat 6:49 PM. The wheel code waits on answers 1, 2, 3 and 7. |
 | Power: battery or wall power, and how far can the robot roll | Open. Part of the questions above. It decides whether the robot can move at all. |
-| Is there an iPhone for the FaceTime prize? | Open, and the team has none right now. Chert requires one to verify the line and for calls. Options: the judge's own phone at judging, a borrowed iPhone for setup and tests, and building the agent against a LiveKit room in a browser so no iPhone is needed until the last step. Ask Chert. |
+| Is there an iPhone for the FaceTime prize? | Yes. A friend's iPhone is verified for the Chert project and he comes to judging. Any other iPhone can join with the join code. Most agent testing still happens against a LiveKit room in a browser, to save the 50 trial minutes. |
 | Which machine runs the Chert connector and the call agent? | Hasan's Windows laptop, inside WSL2 first, native Windows second, the Pi third. Nobody on the team has macOS. Untested. |
 | Does a press on the head read cleanly from the motors? | Open. The brain so far senses a press on an antenna. The head press is in the next brain prompt. To be proven on the real robot. |
 | Does the brain run on the real Pi with the real robot, camera, microphones and speaker? | Open. Nothing has been tried on real hardware or with real keys. |
 | Gemini free tier may use the frames it is sent and show them to reviewers | Open. Hasan to decide: a paid-tier key, or change the privacy wording. |
-| Does Chert access last through Sunday afternoon? | Yes if the trial starts after Sat 4 PM: it runs 48 hours. The limit that matters is 50 FaceTime minutes in total, 5 minutes a call. |
+| Does Chert access last through Sunday afternoon? | Yes. The trial started Sat about 7:35 PM. It lasts 24 or 48 hours (the tool and the guide disagree) and both cover judging at 1 PM. The limits that matter are 50 FaceTime minutes in total, 5 minutes a call, and a shared line that carries one call at a time. |
 | Does the venue network carry the live view at 4 frames a second? | Open. Test early on Sunday. The frame rate drops through `LIVE_VIEW_FPS`. |
 | Email provider for the backup email | Open. Decided when escalation is built. |
 | Demo sessions are open to anyone with the link during the event | Accepted. A demo session plays the scripted run only and never receives live records or the live view. |

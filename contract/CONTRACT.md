@@ -1,6 +1,10 @@
 # Argos contract
 
-Version 0.4 · Sat Nov 14 2026
+Version 0.4.1 · Sat Nov 14 2026
+
+Changed in 0.4.1: a reader of the live view forgets the last `seq` once the view has stopped
+(section 6). The dashboard listens for record changes on the private channel
+`records:<device id>` (section 4). Nothing the brain sends changed.
 
 Changed in 0.4: a pat may be a press on the head or on an antenna. `asked` may say that the
 line was not spoken. The brain may acknowledge from its own keyboard. The robot sits on a
@@ -231,6 +235,11 @@ There is no anonymous access. Everyone signs in. There are two kinds of session:
 | Sensor history (`readings`) | **No** | **Yes** |
 | Acknowledge an incident | Yes | Yes |
 
+**How live records reach the dashboard.** It reads the tables, and listens for changes on a
+private channel with the topic `records:<device id>`. Joining needs a member's session that
+has passed its second factor. What arrives is still decided table by table, by the rules
+above.
+
 **The one write the dashboard makes:** acknowledging an escalated incident. It sets `status`
 to `acknowledged` and fills `acknowledged_by` and `acknowledged_at`. The brain then sets
 `ended_at`, records the `acknowledged` event and returns the device to `calm`. The
@@ -302,13 +311,15 @@ Each `frame` message:
 
 | Field | Type | Notes |
 |---|---|---|
-| `seq` | integer | Counts up from 0 each time the brain starts. A reader drops a frame whose `seq` is lower than the last one shown. |
+| `seq` | integer | Counts up from 0 each time the brain starts. A reader drops a frame whose `seq` is lower than the last one shown, until the view has stopped (below); then it forgets the last `seq` and takes the next frame, whatever its number. |
 | `at` | timestamp | When the frame was captured. |
 | `w`, `h` | integer | Size in pixels. The long side is at most 480. |
 | `jpeg` | text | One JPEG image, base64. The whole message stays under 100 KB. |
 
 **For the reader.**
 
+- Extra fields in a frame are ignored. The 5 seconds below are counted from when frames
+  arrive, never from `at`.
 - No frame for 5 seconds means the view has stopped. Show the last frame faded and say how
   long ago it was. Everything else on the dashboard keeps working.
 - The reader never asks for a frame and never writes to the channel.
