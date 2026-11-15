@@ -233,3 +233,17 @@ def test_elevenlabs_request_shape() -> None:
     assert request.headers["xi-api-key"] == "MARKER-KEY"
     assert json.loads(request.content) == {"text": "Are you okay?",
                                            "model_id": "eleven_flash_v2_5"}
+
+
+def test_a_mono_line_goes_to_both_channels_of_a_stereo_card() -> None:
+    """The robot's card is stereo only, and its speaker is heard only with both channels."""
+    import numpy as np
+
+    from argos.voice import spread
+
+    mono = np.array([1, -2, 3], dtype="<i2")
+    stereo = spread(mono, 2)
+    assert stereo.shape == (3, 2) and stereo.dtype == mono.dtype
+    assert (stereo[:, 0] == mono).all() and (stereo[:, 1] == mono).all()
+    assert spread(mono, 8).shape == (3, 2)
+    assert spread(mono, 1) is mono

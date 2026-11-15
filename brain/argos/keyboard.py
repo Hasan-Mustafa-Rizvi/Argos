@@ -64,6 +64,7 @@ class Keyboard:
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
         self._restore: Callable[[], None] | None = None
+        self._esc = ""  # where we are in a terminal escape sequence ("" when not in one)
 
     def start(self) -> None:
         self._thread = threading.Thread(target=self._run, name="argos-keyboard", daemon=True)
@@ -79,6 +80,41 @@ class Keyboard:
         key = char.lower()
         if key in KEYS:
             self.on_key(key)
+
+    def _feed(self, data: str) -> None:
+        """Characters from a terminal, with its escape sequences dropped whole.
+
+        Arrow and function keys, and a terminal's own reports, arrive as ESC and a few
+        characters. Taken one by one they were keys: on the Pi the brain quit on its own, and
+        an up arrow (ESC [ A) would acknowledge, Home (ESC [ H) start a check, F1 (ESC O P)
+        stand a check down. A sequence may be split across reads, so the state is kept."""
+        for char in data:
+            state = self._esc
+            if state == "":
+                if char == "\x1b":
+                    self._esc = "esc"
+                else:
+                    self._deliver(char)
+            elif state == "esc":
+                self._esc = {"[": "csi", "O": "ss3", "P": "str", "]": "str", "X": "str",
+                             "^": "str", "_": "str"}.get(char, "")
+            elif state == "csi":
+                if "\x40" <= char <= "\x7e":
+                    self._esc = ""
+            elif state == "ss3":
+                self._esc = ""
+            elif state == "str":
+                if char == "\x07":
+                    self._esc = ""
+                elif char == "\x1b":
+                    self._esc = "str-esc"
+            else:  # "str-esc": ESC \ ends the string
+                self._esc = "" if char == "\\" else "str"
+
+    def _idle(self) -> None:
+        """Nothing more arrived: a lone ESC was the Escape key, not a sequence."""
+        if self._esc == "esc":
+            self._esc = ""
 
     def _run(self) -> None:
         try:
@@ -120,8 +156,9 @@ class Keyboard:
                     data = os.read(fd, 32).decode("utf-8", "ignore")
                     if not data:
                         return
-                    for char in data:
-                        self._deliver(char)
+                    self._feed(data)
+                else:
+                    self._idle()
         finally:
             if self._restore:
                 self._restore()

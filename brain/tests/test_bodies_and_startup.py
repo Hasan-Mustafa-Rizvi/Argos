@@ -267,3 +267,41 @@ def test_keys_drive_the_brain() -> None:
     rig.brain.key("q")
     rig.step()
     assert rig.brain.quit.is_set()
+
+
+@pytest.mark.parametrize(("sent", "keys"), [
+    ("\x1b[A", []),                      # up arrow: was "a", an acknowledgement
+    ("\x1b[H\x1b[F", []),                # Home and End: were "h" and "f", checks started
+    ("\x1bOP\x1bOS", []),                # F1 and F4: were "p" (a pat) and "s"
+    ("\x1b[<64;10;5M", []),              # a mouse report: was "m"
+    ("\x1b[?1;2c", []),                  # a terminal's answer to a query
+    ("\x1bP1$r2 q\x1b\\", []),           # a terminal string reply, ending in "q" before ST
+    ("\x1b]11;rgb:0000/0000/0000\x07", []),
+    ("m\x1b[Ay", ["m", "y"]),            # real keys around a sequence still count
+    ("Q", ["q"]),                        # caps lock still works
+])
+def test_terminal_escape_sequences_are_never_keys(sent: str, keys: list[str]) -> None:
+    """On the Pi the brain quit by itself; an arrow key could have acknowledged an alert."""
+    got: list[str] = []
+    keyboard = Keyboard(got.append, stream=io.StringIO(""))
+    keyboard._feed(sent)
+    assert got == keys
+
+
+def test_an_escape_sequence_split_across_reads_is_still_dropped() -> None:
+    got: list[str] = []
+    keyboard = Keyboard(got.append, stream=io.StringIO(""))
+    keyboard._feed("\x1b")
+    keyboard._feed("[")
+    keyboard._feed("A")
+    keyboard._feed("a")
+    assert got == ["a"]
+
+
+def test_a_lone_escape_key_does_not_swallow_the_next_key_after_a_pause() -> None:
+    got: list[str] = []
+    keyboard = Keyboard(got.append, stream=io.StringIO(""))
+    keyboard._feed("\x1b")
+    keyboard._idle()
+    keyboard._feed("m")
+    assert got == ["m"]

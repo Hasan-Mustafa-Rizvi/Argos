@@ -370,3 +370,70 @@ def test_no_frame_written_anywhere_by_the_senses(tmp_path: Path,
     assert camera.latest_any() is not None
     assert list(tmp_path.iterdir()) == []
     assert not any(name.endswith((".jpg", ".png")) for name in os.listdir(tmp_path))
+
+
+def test_the_sdk_gets_at_least_the_api_minimum_deadline() -> None:
+    """Google refuses a deadline under 10 s (HTTP 400). The brain's own limits stay around each
+    call; only the SDK's is raised."""
+    from argos.gemini import SERVER_MIN_DEADLINE_S, sdk_timeout_ms
+
+    assert SERVER_MIN_DEADLINE_S == 10.0
+    assert sdk_timeout_ms(8.0) == 10000
+    assert sdk_timeout_ms(1.0) == 10000
+    assert sdk_timeout_ms(15.0) == 15000
+
+
+def test_the_camera_grabs_every_frame_but_decodes_only_what_is_needed() -> None:
+    """The robot's camera gives 60 frames a second in MJPG; only about 12 are decoded."""
+    from argos.senses.camera import MAX_DECODE_FPS, Camera
+
+    counts = {"grab": 0, "retrieve": 0}
+
+    class FastCapture:
+        def grab(self) -> bool:
+            time.sleep(1 / 120)
+            counts["grab"] += 1
+            return True
+
+        def retrieve(self) -> tuple[bool, np.ndarray]:
+            counts["retrieve"] += 1
+            return True, image()
+
+        def read(self) -> tuple[bool, np.ndarray]:
+            raise AssertionError("grab and retrieve are used when the capture has them")
+
+        def release(self) -> None: ...
+
+    camera = Camera(0, FakeClock(), opener=lambda d, w, h: FastCapture())
+    camera.start()
+    wait_for(lambda: camera.latest_any() is not None)
+    time.sleep(0.6)
+    camera.stop()
+    seconds = counts["grab"] / 120
+    assert counts["grab"] > 3 * counts["retrieve"]
+    assert counts["retrieve"] <= seconds * MAX_DECODE_FPS + 2
+
+
+def test_on_linux_the_camera_is_asked_for_mjpg(monkeypatch: pytest.MonkeyPatch) -> None:
+    import cv2
+
+    from argos.senses import camera as camera_module
+
+    asked: list[tuple[int, float]] = []
+
+    class FakeVideoCapture:
+        def __init__(self, *args: Any) -> None: ...
+
+        def isOpened(self) -> bool:  # noqa: N802 (OpenCV's name)
+            return True
+
+        def set(self, prop: int, value: float) -> bool:
+            asked.append((prop, value))
+            return True
+
+    monkeypatch.setattr(cv2, "VideoCapture", FakeVideoCapture)
+    monkeypatch.setattr(camera_module.sys, "platform", "linux")
+    camera_module.open_capture("/dev/video0", 640, 480)
+    props = [prop for prop, _ in asked]
+    assert (cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG")) in asked
+    assert props.index(cv2.CAP_PROP_FOURCC) < props.index(cv2.CAP_PROP_FRAME_WIDTH)

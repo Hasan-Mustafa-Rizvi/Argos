@@ -14,7 +14,10 @@ from __future__ import annotations
 import hashlib
 import logging
 import queue
+import subprocess
+import sys
 import threading
+import time
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Protocol
@@ -78,6 +81,19 @@ class Speaker(Protocol):
     def play(self, pcm: bytes, rate: int) -> None: ...
 
 
+def spread(samples: Any, channels: int) -> Any:
+    """Mono samples as `channels` identical channels (at most two).
+
+    The robot's sound card takes stereo only. Given a mono stream, the audio library fills the
+    left channel and leaves the right one silent, and the robot's speaker then plays it so
+    faintly that nobody heard it on the real robot. The same sound on both channels is heard."""
+    import numpy as np
+
+    if channels < 2:
+        return samples
+    return np.repeat(np.asarray(samples).reshape(-1, 1), 2, axis=1)
+
+
 class SoundDeviceSpeaker:
     def __init__(self, device: int | str | None) -> None:
         self.device = device
@@ -87,7 +103,81 @@ class SoundDeviceSpeaker:
         import sounddevice as sd
 
         samples = np.frombuffer(pcm[: len(pcm) - len(pcm) % 2], dtype="<i2")
-        sd.play(samples, samplerate=rate, device=self.device, blocking=True)
+        try:
+            channels = int(sd.query_devices(self.device, "output")["max_output_channels"])
+        except Exception:
+            channels = 1
+        sd.play(spread(samples, channels), samplerate=rate, device=self.device, blocking=True)
+
+
+PLAYBACK_START_S = 5.0  # starting Python and opening the card, on top of the line itself
+
+
+class PlaybackFailed(RuntimeError):
+    """The playback process did not play the line: it failed, died, or ran out of time."""
+
+
+class ProcessSpeaker:
+    """Plays each line in a process of its own (`argos.playback`), which the brain can afford
+    to lose.
+
+    On the real robot the sound card dropped off USB for a second when the head was pressed,
+    and opening it then aborted the whole brain from inside PortAudio, beyond any try/except.
+    Now that can only end the playback process. It has the line's length plus
+    PLAYBACK_START_S to finish, and is killed after that. Anything but a clean exit raises
+    PlaybackFailed, and the line counts as not spoken. The brain's own process never opens the
+    sound card for this, so it never loads the audio library for it either."""
+
+    def __init__(self, out: str = "auto", robot: bool = False,
+                 command: list[str] | None = None,
+                 start_s: float = PLAYBACK_START_S) -> None:
+        self.command = command or [sys.executable, "-m", "argos.playback", "--out", out,
+                                   *(["--robot"] if robot else [])]
+        self.start_s = start_s
+
+    def play(self, pcm: bytes, rate: int) -> None:
+        from argos.config import BRAIN_DIR
+
+        limit = len(pcm) / 2 / rate + self.start_s
+        try:
+            process = subprocess.Popen([*self.command, "--rate", str(rate)],
+                                       stdin=subprocess.PIPE, stdout=subprocess.DEVNULL,
+                                       stderr=subprocess.PIPE, cwd=BRAIN_DIR)
+        except OSError as exc:
+            raise PlaybackFailed(f"the playback process did not start ({exc})") from None
+        # The sound goes in, and the errors come out, on threads of their own, and the time
+        # limit is on wait(): on Windows `communicate()` writes the input with no time limit,
+        # so a player that never reads held the brain's voice for as long as it lived.
+        errors: list[bytes] = []
+
+        def feed() -> None:
+            try:
+                assert process.stdin is not None
+                process.stdin.write(pcm)
+                process.stdin.close()
+            except (OSError, ValueError):
+                pass  # the player is gone; its exit says the rest
+
+        def drain() -> None:
+            try:
+                assert process.stderr is not None
+                errors.append(process.stderr.read())
+            except (OSError, ValueError):
+                pass
+
+        for job in (feed, drain):
+            threading.Thread(target=job, name="argos-playback-io", daemon=True).start()
+        try:
+            process.wait(timeout=limit)
+        except subprocess.TimeoutExpired:
+            process.kill()  # anything it started that still holds the pipes is let go
+            raise PlaybackFailed(f"not finished within {limit:.1f} s; stopped") from None
+        if process.returncode != 0:
+            time.sleep(0.05)  # let the last error line arrive
+            err = errors[0] if errors else b""
+            lines = (err or b"").decode("utf-8", "replace").strip().splitlines()
+            why = f": {lines[-1][:160]}" if lines else ""
+            raise PlaybackFailed(f"the playback process ended with {process.returncode}{why}")
 
 
 class Voice:
@@ -186,7 +276,8 @@ class Voice:
                     self.speaker.play(pcm, RATE)
                     spoken = True
                 except Exception as exc:
-                    self._warn("speaker", f"speaker failed ({exc})")
+                    # Every time, not once: a line that did not play is worth seeing.
+                    log.warning("the line %r was not played (%s); carrying on", key, exc)
                     self.beep(300)
                 finally:
                     if self.gate is not None:

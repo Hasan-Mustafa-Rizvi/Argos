@@ -1,7 +1,7 @@
 # Argos software tracker
 
 **Last updated:** Sat Nov 14 2026, 8:15 PM CT
-**Status:** The dashboard signs in for real and reads live records. The brain is built and reviewed but untried on real hardware. The Chert trial is running and a phone is verified. The dashboard is live on real accounts. The call agent places real FaceTime calls. Next: the whole path end to end, and the first run of the brain on the robot. The wheels wait on the hardware team's answers.
+**Status:** The dashboard signs in for real and reads live records. The brain is built and reviewed but untried on real hardware. The Chert trial is running and a phone is verified. The dashboard is live on real accounts. The brain runs on the real robot and the whole chain has run in dry-run. Next: one real call in the morning, the Devpost text and the pitch. The wheels wait on the hardware team's answers.
 
 Hasan owns all software. This file records where the software is. Coding agents never edit it.
 
@@ -109,9 +109,9 @@ With Neel and Farrell:
 
 ## Known limits
 
-- Nothing in `brain/` has run on the real Pi, robot, camera, microphone or speaker, or against the real backend or real keys.
-- The head press is built but its thresholds are guesses until measured on the robot.
-- The wheels, the guard and the approach have only run against fakes.
+- The robot's microphones are dead and its audio board drops off USB when the head is pressed or moves. The brain rides through it. No spoken answer and no call-for-help trigger without a USB microphone.
+- The wheels have never run. The stillness trigger is untried on the robot.
+- The dashboard's control for the original picture flickers while live frames arrive.
 - The dashboard's live picture and stored snapshot have never been seen with a real camera. Everything else on it has been seen against the real backend.
 - The live view over the venue network is untested.
 - The call agent has not run against the real backend with the brain: the acknowledgement reaching the database, the dashboard clearing and the dog calming are proven only on fakes.
@@ -122,6 +122,32 @@ With Neel and Farrell:
 - A manual override was mentioned by Hasan as a possible later addition. Not specified.
 
 ## Log
+
+### Sun Nov 15, 5:00 AM
+First run on the real robot, from Hasan's laptop over SSH to the Pi (a Pi 5 on Debian 13).
+It works. Seen for real: the camera raising a fall by itself with a person on the floor,
+the spoken question, a pat on the head standing it down (15 of 15 firm presses, a tap
+ignored), no answer escalating, Gemini's summary and the stored snapshot on the dashboard,
+an acknowledgement on the dashboard calming the dog, the live camera view on the dashboard,
+and the call agent on the laptop picking up a real escalation one second later and logging
+the text and the FaceTime call in dry-run.
+
+Faults found on the hardware and fixed, each with tests: every Gemini call was refused (the
+deadline was under the API's minimum); the voice played on one channel at low volume; the
+camera ran at 5 frames a second; the robot's own software silently dropped one head move in
+four; arrow keys were read as commands; and a sound card dropping off USB aborted the whole
+brain. Sound now plays in its own process, and `tools/demo.sh` restarts the brain if it ever
+exits. 339 tests pass on the Pi, 335 on the laptop.
+
+The robot has a hardware fault: the audio board in the head drops off USB for about a
+second when the head is pressed or moves, and its microphones give nothing. So there is no
+spoken "yes" and no "help me" trigger unless a USB microphone is found. The demo uses the
+camera or a key to raise the alert and the pat to answer it. A decision kept as it is: a
+brain that restarts with a check still open asks again.
+
+Not done: the real call (the contact was asleep), the wheels, the stillness trigger. A
+dashboard fault to fix: the "show the original picture" control flickers while frames arrive.
+`brain/HARDWARE_RUN.md` holds the full log and the demo sheet.
 
 ### Sun Nov 15, 1:50 AM
 Brain B built by Claude Code on Hasan's machine against fakes, rebuilt from a clean copy on

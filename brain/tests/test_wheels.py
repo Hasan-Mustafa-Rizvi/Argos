@@ -490,7 +490,10 @@ def test_killing_the_brain_outright_stops_the_motors(tmp_path: Path) -> None:
     entries = records(record)
     exit_entry = entries[-1]
     assert exit_entry["event"] == "exit"
-    assert exit_entry["reason"] == "the brain went away (its pipe closed)"
+    # Either sign may come first: the pipe closing, or the parent changing (on the Pi, the
+    # parent check won the race the first time this test ran on Linux). Both stop the motors.
+    assert exit_entry["reason"] in ("the brain went away (its pipe closed)",
+                                    "the brain went away")
     assert not running(exit_entry)
     first_stop = next(e for e in entries if e["t"] >= killed - 1 and not running(e))
     assert first_stop["t"] - killed < 1.0

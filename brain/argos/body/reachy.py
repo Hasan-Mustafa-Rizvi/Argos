@@ -8,8 +8,14 @@ unless it is the wireless version). This driver uses these calls:
     GET  /api/motors/status                 {"mode": "enabled" | "disabled" | ...}
     POST /api/motors/set_mode/enabled       hold position
     POST /api/move/goto                     move head and antennas over a duration
+    GET  /api/move/running                  the moves the daemon is running
+    POST /api/move/stop                     stop one, so the next move is not refused
     GET  /api/state/full?...                where the head and antennas are, and where they
                                             were told to be
+
+The daemon runs one move at a time and drops a goto that arrives while another runs, while
+still answering 200 (seen on the real robot with daemon 1.14.0: 115 of 470 moves lost). A
+move sent before the last one has surely ended stops the running move first (`_send`).
 
 What the daemon reports for the head, from its source (reachy_mini, daemon/app/routers/
 state.py and backend/): `head_pose` is worked out from the six head motors by its kinematics
@@ -55,6 +61,9 @@ log = logging.getLogger("argos.robot")
 ROBOT_CAPS = ["head", "antennas", "camera", "voice"]
 RECONNECT_S = 10.0
 TICK_S = 0.05
+# A daemon move can end a little after its duration. A move sent sooner than this after the
+# last one's planned end stops the running move first (`RobotBody._send`).
+MOVE_GAP_S = 0.25
 STATE_PATH = "/api/state/full"
 
 
@@ -112,7 +121,14 @@ class ReachyClient:
 
     def _call(self, method: str, path: str, **kwargs: Any) -> Any:
         try:
-            response = self._client.request(method, path, **kwargs)
+            try:
+                response = self._client.request(method, path, **kwargs)
+            except (httpx.ReadError, httpx.RemoteProtocolError, httpx.WriteError):
+                # The daemon's server closes a connection after a request it failed on, and
+                # the next call on that kept-alive connection breaks (seen on the Pi:
+                # "robot lost (POST /api/move/goto: ReadError)"). Once more, on a fresh one.
+                # Every call here is safe to repeat: a goto to the same pose included.
+                response = self._client.request(method, path, **kwargs)
         except httpx.HTTPError as exc:
             raise RobotUnavailable(f"{method} {path}: {type(exc).__name__}") from None
         if response.status_code >= 400:
@@ -135,6 +151,34 @@ class ReachyClient:
 
     def enable_motors(self) -> None:
         self._call("POST", "/api/motors/set_mode/enabled")
+
+    def stop_moves(self) -> int:
+        """Stop every move the daemon is running, and say how many.
+
+        The daemon runs one move at a time. A goto sent while another runs is refused
+        (`MoveBusyError`, logged by the daemon as "Rejecting move request: another move is
+        running"), yet the HTTP call still answers 200, because the move runs as a background
+        task. On the real robot one move in four was lost that way. So a move that must happen
+        now stops the running one first. A daemon without these calls, or a move that ended in
+        between, is not an error."""
+        try:
+            running = self._call("GET", "/api/move/running") or []
+        except RobotRefused:
+            return 0
+        stopped = 0
+        for item in running if isinstance(running, list) else []:
+            uuid = item.get("uuid") if isinstance(item, dict) else None
+            if not uuid:
+                continue
+            try:
+                # A move that ended since it was listed is refused with HTTP 500, and the
+                # daemon's server then drops the connection: this one is used for nothing else.
+                self._call("POST", "/api/move/stop", json={"uuid": str(uuid)},
+                           headers={"Connection": "close"})
+                stopped += 1
+            except RobotRefused:
+                pass
+        return stopped
 
     def goto(self, pose: Pose, duration: float) -> None:
         self._call(
@@ -343,6 +387,11 @@ class RobotBody:
         target = poses.clamp(move.pose)
         duration = poses.safe_duration(self._pose, target, move.duration)
         try:
+            if now < self._moving_until + MOVE_GAP_S:
+                # Our last move may still be running, and the daemon would silently drop this
+                # one (see ReachyClient.stop_moves): a check would not look up, and the head
+                # could stay in the alert pose after an acknowledgement.
+                self.client.stop_moves()
             self.client.goto(target, duration)
         except RobotUnavailable as exc:
             self._lost(now, str(exc))

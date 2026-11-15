@@ -16,6 +16,7 @@ python -m argos --check     # try every part once and print one table; records n
 python -m argos --wheel-test   # turn each wheel briefly, base lifted (ARGOS_WHEELS=1)
 python -m argos --script    # play the story of contract/fixtures/demo_scenario.jsonl live
 python -m argos --script --loop
+bash tools/demo.sh          # the demo on the Pi: wheels and listening off, started again if it crashes
 ```
 
 On a new machine, run `--check` first: [FIRST_RUN.md](FIRST_RUN.md) is the sheet for the Pi.
@@ -112,7 +113,8 @@ ruff check .
 ```
 
 The wheel guard is tested as a real separate process with fake pins. Three tests that send
-POSIX signals to it run on Linux only.
+POSIX signals to it, and the one for `tools/demo.sh`, run on Linux only: run the suite on the
+Pi too (`uv pip install -r requirements-dev.txt` there).
 
 ## Settings
 
@@ -135,7 +137,7 @@ Read from the environment, then from `brain/.env`. All are optional.
 | `ARGOS_HEAD_PAT_MM` | `5` | How far a press must move the head from its resting position, in millimetres (1 to 50). Tune from `--check`. |
 | `ARGOS_HEAD_PAT_DEG` | `5` | Or how far it must tilt it, in degrees (1 to 45). |
 | `ARGOS_HEAD_PAT_HOLD_S` | `0.5` | How long a press must be held to count (0.2 to 3). A knock is shorter. |
-| `ARGOS_WHEELS` | off | `1`: the real wheels (contract section 2). They arm only with a keyboard attached, never under a service or in a scripted run. `fake`: pretend wheels that move nothing and log each burst, for a laptop. Anything else: off, and no pin is touched. |
+| `ARGOS_WHEELS` | off | `1`: the real wheels (contract section 2). They arm only with a keyboard attached, never under a service or in a scripted run. `fake`: pretend wheels that move nothing and log each burst, for a laptop. Anything else: off, and no pin is touched. Give it on the command line of the run that needs it, never in `brain/.env` (`--check` fails if the file holds `1`). |
 | `ARGOS_APPROACH_MAX_S` | `6` | An approach ends this long after it began, however far it got (1 to 15). |
 | `ARGOS_APPROACH_REST_S` | `300` | No approach within this long of the end of the last one (30 to 86400). |
 | `ARGOS_WHEELS_POWER` | `0.20` | Power for a burst forward, as a share of full (0.05 to 0.60). Never above 0.60, whatever is set. Find it with `--wheel-test`. |
@@ -181,6 +183,11 @@ Read from the environment, then from `brain/.env`. All are optional.
 - `argos/check.py`: `--check` and `--wheel-test`.
 - `argos/senses/`: camera, pose-based fall and stillness, listening. `argos/voice.py`,
   `argos/gemini.py`, `argos/snapshot.py`, `argos/liveview.py`.
+- `argos/playback.py`: plays one line and exits. The brain runs it in a process of its own
+  for every line (`voice.ProcessSpeaker`), because a sound card that drops off USB can abort
+  a process from inside PortAudio, where no Python code can catch it. With `ARGOS_LISTEN=off`
+  nothing in the brain's own process opens the sound card.
+- `tools/demo.sh`: the demo's start on the Pi.
 - `tools/pretend_board.py`: pretends to be the sensor board on a TCP port.
 
 ## The wheels

@@ -137,6 +137,20 @@ def read_text(path: str) -> str | None:
         return None
 
 
+def read_env_file(path: Path = BRAIN_DIR / ".env") -> dict[str, str]:
+    """The settings given a value in the .env file itself (not the environment). Held in memory
+    to be looked at; never printed."""
+    if not path.exists():
+        return {}
+    try:
+        from dotenv import dotenv_values
+
+        values = dotenv_values(path)
+    except Exception:
+        return {}
+    return {name: value.strip() for name, value in values.items() if (value or "").strip()}
+
+
 class SoundDeviceAudio:
     """The machine's sound devices, through sounddevice."""
 
@@ -189,12 +203,15 @@ def _speech_model(path: Path) -> Any:
 
 
 def gemini_ping(api_key: str, model: str, timeout_s: float) -> Callable[[], str]:
-    """One small text request, with no picture."""
+    """One small text request, with no picture. The check's own limit for this row stays
+    around it (`PROBES`); the SDK gets at least the API's minimum deadline."""
     from google import genai
     from google.genai import types
 
+    from argos.gemini import sdk_timeout_ms
+
     client = genai.Client(api_key=api_key,
-                          http_options=types.HttpOptions(timeout=int(timeout_s * 1000)))
+                          http_options=types.HttpOptions(timeout=sdk_timeout_ms(timeout_s)))
 
     def ping() -> str:
         response = client.models.generate_content(
@@ -233,6 +250,7 @@ class Hardware:
     gemini: Callable[[str, str, float], Callable[[], str]] = gemini_ping
     guard: Callable[[], Any] = _guard
     read_file: Callable[[str], str | None] = read_text
+    env_file: Callable[[], Mapping[str, str]] = read_env_file
     gpio_present: Callable[[], bool] = lambda: any(Path("/dev").glob("gpiochip*"))
     platform: str = sys.platform
     interactive: bool = False
@@ -321,15 +339,32 @@ def probe_settings(ctx: Context) -> Row:
             + (f": {', '.join(present)}." if present else ".")]
     if missing:
         seen.append(f"Not set: {', '.join(missing)}.")
+    # Which of those came from the command line rather than the file: an ARGOS_WHEELS=0 typed
+    # before --check was once taken for a value in brain/.env.
+    from_file = ctx.hw.env_file()
+    elsewhere = [name for name in present if name not in from_file] if from_file else []
+    if elsewhere:
+        seen.append("Given on the command line or in the environment, not in brain/.env: "
+                    f"{', '.join(elsewhere)}.")
+    result, todo = OK, ""
     if ctx.unreadable:
         seen.append(f"Could not use (defaults taken): {', '.join(ctx.unreadable)}.")
-        return Row("settings", WARN, " ".join(seen),
-                   "Fix those in brain/.env: each must be a number in its range (README.md, "
-                   "Settings).")
-    if not env_file and not present:
-        return Row("settings", WARN, " ".join(seen),
-                   "Copy brain/.env.example to brain/.env and fill in what you have.")
-    return Row("settings", OK, " ".join(seen))
+        result, todo = WARN, ("Fix those in brain/.env: each must be a number in its range "
+                              "(README.md, Settings).")
+    elif not env_file and not present:
+        result, todo = WARN, "Copy brain/.env.example to brain/.env and fill in what you have."
+    # ARGOS_WHEELS belongs on the command line of the one run that needs it, never in the file:
+    # there it would arm the wheels on every later start. The value is looked at, not printed.
+    in_file = (from_file.get("ARGOS_WHEELS") or "").strip()
+    if in_file:
+        arms = in_file.lower() == "1"
+        seen.append("ARGOS_WHEELS has a value in brain/.env"
+                    + (" that switches the wheels on at every start." if arms else "."))
+        result = FAIL if arms else WARN
+        todo = ("Empty the ARGOS_WHEELS line in brain/.env. Give it only on the command line of "
+                "the run that needs it: ARGOS_WHEELS=1 python -m argos." + (f" {todo}" if todo
+                                                                           else ""))
+    return Row("settings", result, " ".join(seen), todo)
 
 
 def probe_python(ctx: Context) -> Row:
@@ -1024,7 +1059,7 @@ def gemini_reason(exc: BaseException) -> tuple[str, str]:
     message = str(getattr(exc, "message", "") or exc).lower()
     if isinstance(exc, ImportError):
         return "the google-genai package is missing", "uv pip install -r requirements.txt"
-    if code == 400 and "key" in message:
+    if code == 400 and ("api key" in message or "api_key" in message):
         return "the key is not valid", "Check GEMINI_API_KEY."
     if code in (401, 403):
         return "the key may not use this model", "Check GEMINI_API_KEY and GEMINI_MODEL."
@@ -1034,7 +1069,11 @@ def gemini_reason(exc: BaseException) -> tuple[str, str]:
         return "over the quota or the rate limit", "Wait a minute, or use a key on a paid plan."
     if "timeout" in type(exc).__name__.lower() or "timed out" in message:
         return "no answer in time", "Check the network and run --check again."
-    return (f"{type(exc).__name__}{f' (HTTP {code})' if code else ''}",
+    # Google's own words say what is wrong, where the code alone does not (on the Pi: "Manually
+    # set deadline 8s is too short"). They never hold the key, and the table is redacted anyway.
+    said = " ".join(str(getattr(exc, "message", "") or "").split())[:160]
+    return (f"{type(exc).__name__}{f' (HTTP {code})' if code else ''}"
+            + (f'; Google says: "{said}"' if said else ""),
             "Check the network and GEMINI_API_KEY.")
 
 
@@ -1283,7 +1322,8 @@ def _wheel_runs(ctx: Context) -> list[Row]:
     s, hw = ctx.settings, ctx.hw
     if s.wheels == "off":
         return [Row("wheel test", FAIL, "The wheels are off (ARGOS_WHEELS is not 1), so no pin "
-                    "may be touched.", "Set ARGOS_WHEELS=1 in brain/.env first.")]
+                    "may be touched.", "Start it as ARGOS_WHEELS=1 python -m argos --wheel-test "
+                    "(on the command line only, never in brain/.env).")]
     if not hw.interactive:
         return [Row("wheel test", FAIL, "Not run in a terminal: the wheel test needs a person "
                     "at the keyboard.", "Run python -m argos --wheel-test in a terminal.")]

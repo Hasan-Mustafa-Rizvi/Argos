@@ -59,6 +59,18 @@ SCORE_SCHEMA = {
 
 Generate = Callable[[str, bytes, dict[str, Any] | None], str]
 
+# The SDK sends its time limit to Google as the request's deadline, and the API refuses any
+# deadline under 10 s with HTTP 400 ("Manually set deadline 8s is too short. Minimum allowed
+# deadline is 10s."), seen on the real Pi. So the SDK is given at least 10 s. The brain's own
+# limits (`ARGOS_GEMINI_TIMEOUT_S` for the check, `ARGOS_SUMMARY_TIMEOUT_S` for the summary)
+# are kept around each call by `brain.call_with_timeout`, unchanged.
+SERVER_MIN_DEADLINE_S = 10.0
+
+
+def sdk_timeout_ms(timeout_s: float) -> int:
+    """The time limit to give the SDK: the brain's own, raised to the API's minimum."""
+    return int(max(timeout_s, SERVER_MIN_DEADLINE_S) * 1000)
+
 
 def sdk_generate(api_key: str, model: str, timeout_s: float) -> Generate:
     """The real call, through google-genai."""
@@ -66,7 +78,7 @@ def sdk_generate(api_key: str, model: str, timeout_s: float) -> Generate:
     from google.genai import types
 
     client = genai.Client(
-        api_key=api_key, http_options=types.HttpOptions(timeout=int(timeout_s * 1000))
+        api_key=api_key, http_options=types.HttpOptions(timeout=sdk_timeout_ms(timeout_s))
     )
 
     def generate(prompt: str, jpeg: bytes, schema: dict[str, Any] | None) -> str:

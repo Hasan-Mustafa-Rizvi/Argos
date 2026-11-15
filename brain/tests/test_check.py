@@ -161,7 +161,7 @@ def missing_hardware(clock: FakeClock, world: World) -> Hardware:
                     audio=NoAudio(), sntp=broken, run=lambda args, t: broken(),
                     processes=broken, pose_estimator=broken, speech_model=broken,
                     gemini=broken, guard=lambda: pytest.fail("no guard may start"),
-                    read_file=lambda path: None, gpio_present=lambda: False,
+                    read_file=lambda path: None, env_file=dict, gpio_present=lambda: False,
                     platform="linux", interactive=False, ask=lambda q: pytest.fail("no question"),
                     say=lambda message: None)
 
@@ -193,7 +193,7 @@ def present_hardware(clock: FakeClock, world: World, answers: list[str] | None =
                     speech_model=lambda path: object(),
                     gemini=lambda key, model, t: (lambda: "ok"),
                     read_file=lambda path: "Raspberry Pi 5 Model B Rev 1.0\x00",
-                    gpio_present=lambda: True, platform="linux",
+                    env_file=dict, gpio_present=lambda: True, platform="linux",
                     interactive=answers is not None, ask=ask,
                     say=(said.append if said is not None else (lambda message: None)))
 
@@ -459,3 +459,80 @@ def test_the_table_ends_by_saying_nothing_was_kept() -> None:
     run_check({"ARGOS_CAMERA": "off"}, missing_hardware(clock, World(clock, robot=False)), out)
     last = out.getvalue().strip().splitlines()[-1]
     assert last.endswith("Nothing was recorded, and no picture or sound was kept.")
+
+
+# --------------------------------------------------------------------------- found on the real Pi
+
+
+@pytest.mark.parametrize(("in_file", "result"), [("1", FAIL), ("0", "warn")])
+def test_wheels_given_in_the_env_file_are_flagged_without_the_value(
+        tmp_path: Path, in_file: str, result: str) -> None:
+    """ARGOS_WHEELS in brain/.env arms the wheels on every later start; it belongs on the
+    command line. The command line (ARGOS_WHEELS=0 here) still wins for this run."""
+    clock = FakeClock()
+    hardware = missing_hardware(clock, World(clock, robot=False))
+    hardware.env_file = lambda: {"ARGOS_WHEELS": in_file, "GEMINI_API_KEY": "G-secret-value"}
+    out = io.StringIO()
+    run_check({"ARGOS_WHEELS": "0", "ARGOS_CAMERA": "off",
+               "ARGOS_POSE_MODEL": str(tmp_path / "x"), "ARGOS_VOSK_MODEL": str(tmp_path / "y")},
+              hardware, out)
+    table = out.getvalue()
+    assert rows_of(table)["settings"] == result
+    assert "ARGOS_WHEELS has a value in brain/.env" in table
+    assert "Empty the ARGOS_WHEELS line" in table
+    assert "G-secret-value" not in table
+    assert rows_of(table)["wheels"] == "off"
+
+
+def test_the_env_file_is_read_for_names_and_never_printed(tmp_path: Path) -> None:
+    from argos.check import read_env_file
+
+    path = tmp_path / ".env"
+    path.write_text("ARGOS_WHEELS=1\nGEMINI_API_KEY=\nCONTACT_LABEL= Son \n", encoding="utf-8")
+    assert read_env_file(path) == {"ARGOS_WHEELS": "1", "CONTACT_LABEL": "Son"}
+    assert read_env_file(tmp_path / "missing") == {}
+
+
+def test_a_gemini_refusal_says_what_google_said_redacted(tmp_path: Path) -> None:
+    class ClientError(Exception):
+        code = 400
+        message = "Manually set deadline 8s is too short. Minimum allowed deadline is 10s. G-key"
+
+    def refuse(key: str, model: str, timeout: float) -> Any:
+        def ping() -> str:
+            raise ClientError()
+        return ping
+
+    clock = FakeClock()
+    hardware = missing_hardware(clock, World(clock, robot=False))
+    hardware.gemini = refuse
+    out = io.StringIO()
+    run_check({"GEMINI_API_KEY": "G-key", "ARGOS_CAMERA": "off"}, hardware, out)
+    table = " ".join(out.getvalue().split())
+    assert rows_of(out.getvalue())["Gemini"] == FAIL
+    assert "Google says: \"Manually set deadline 8s is too short." in table
+    assert "G-key" not in table and "<GEMINI_API_KEY>" in table
+
+
+def test_the_wheel_test_never_asks_for_the_wheels_in_the_env_file() -> None:
+    clock = FakeClock()
+    hardware = missing_hardware(clock, World(clock))
+    hardware.interactive = True
+    out = io.StringIO()
+    wheel_test({}, hardware, out)
+    text = " ".join(out.getvalue().split())
+    assert "ARGOS_WHEELS=1 python -m argos --wheel-test" in text
+    assert "in brain/.env first" not in text
+
+
+def test_the_settings_row_says_which_names_came_from_the_command_line() -> None:
+    clock = FakeClock()
+    hardware = missing_hardware(clock, World(clock, robot=False))
+    hardware.env_file = lambda: {"CONTACT_LABEL": "Son"}
+    out = io.StringIO()
+    run_check({"CONTACT_LABEL": "Son", "ARGOS_WHEELS": "0", "ARGOS_CAMERA": "off"}, hardware, out)
+    table = " ".join(out.getvalue().split())
+    assert rows_of(out.getvalue())["settings"] == OK
+    said = table.split("Given on the command line or in the environment, not in brain/.env: ")[1]
+    said = said.split(".")[0]
+    assert set(said.split(", ")) == {"ARGOS_WHEELS", "ARGOS_CAMERA"}

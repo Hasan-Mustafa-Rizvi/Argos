@@ -26,6 +26,7 @@ import logging
 import os
 import sys
 import threading
+import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -38,6 +39,9 @@ log = logging.getLogger("argos.camera")
 SETTLE_S = 0.3
 STALE_S = 2.0
 RETRY_S = 15.0
+# Frames decoded a second, at most: detection asks for ARGOS_DETECT_FPS (8 by default) and the
+# live view for LIVE_VIEW_FPS (never more than 8).
+MAX_DECODE_FPS = 12.0
 ROBOT_CAMERA_NAMES = ("Reachy", "Arducam_12MP", "imx708")
 
 
@@ -93,6 +97,11 @@ def open_capture(device: int | str, width: int, height: int) -> Any:
     if not capture.isOpened():
         capture.release()
         raise OSError(f"camera {device!r} did not open (missing, or held by another program)")
+    if sys.platform.startswith("linux"):
+        # A camera keeps the format it was left in. The robot's, uncompressed (YUYV) at its
+        # smallest size, 1920x1080, gives 5 frames a second over USB 2 (seen on the Pi: a choppy
+        # live view, and fewer frames than ARGOS_DETECT_FPS asks for); in MJPG it gives 60.
+        capture.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
     capture.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     capture.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
     capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
@@ -121,6 +130,7 @@ class Camera:
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
         self._warned = False
+        self._next_decode = 0.0
         self.opened = False
 
     def start(self) -> None:
@@ -174,14 +184,36 @@ class Camera:
                 self.opened = True
                 self._warned = False
                 log.info("camera %r open", self.device)
-            ok, image = capture.read()
-            if not ok or image is None:
+            ok, image = self._read(capture)
+            if not ok:
                 log.warning("camera %r stopped giving frames; reopening", self.device)
                 capture.release()
                 capture = None
                 self.opened = False
                 self._stop.wait(1.0)
                 continue
-            self.put(image)
+            if image is not None:
+                self.put(image)
         if capture is not None:
             capture.release()
+
+    def _read(self, capture: Any) -> tuple[bool, Any]:
+        """The next frame, or (True, None) for one taken off the camera but not decoded.
+
+        Every frame is taken off the camera (`grab`, cheap), so the newest one is always fresh,
+        but at most MAX_DECODE_FPS a second are decoded (`retrieve`): in MJPG the robot's camera
+        gives 60 a second at 1920x1080, and decoding them all would cost half a core for frames
+        nobody looks at. A capture without grab and retrieve is simply read."""
+        grab = getattr(capture, "grab", None)
+        retrieve = getattr(capture, "retrieve", None)
+        if grab is None or retrieve is None:
+            ok, image = capture.read()
+            return bool(ok) and image is not None, image
+        if not grab():
+            return False, None
+        now = time.monotonic()
+        if now < self._next_decode:
+            return True, None
+        self._next_decode = now + 1.0 / MAX_DECODE_FPS
+        ok, image = retrieve()
+        return bool(ok) and image is not None, image

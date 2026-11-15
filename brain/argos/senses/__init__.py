@@ -143,7 +143,7 @@ def _listener(settings: Settings, clock: Clock, robot: bool) -> Any:
 
 
 def _voice(settings: Settings, clock: Clock, robot: bool) -> Any:
-    from argos.voice import ElevenLabs, SoundDeviceSpeaker, Voice
+    from argos.voice import ElevenLabs, ProcessSpeaker, Voice
 
     tts = None
     if settings.elevenlabs_api_key and settings.elevenlabs_voice_id:
@@ -151,13 +151,13 @@ def _voice(settings: Settings, clock: Clock, robot: bool) -> Any:
                          settings.elevenlabs_model)
     else:
         log.warning("no ElevenLabs key or voice id: only cached lines can be spoken")
-    speaker = None
-    try:
-        from argos.senses.hearing import pick_device
-
-        speaker = SoundDeviceSpeaker(pick_device(settings.audio_out, "output", robot))
-    except Exception as exc:
-        log.warning("no speaker (%s): Argos will beep instead of speaking, if it can", exc)
+    # Each line plays in a process of its own, which picks the device when it plays: a sound
+    # card that drops off USB can then only end that process, never the brain.
+    speaker = ProcessSpeaker(settings.audio_out, robot)
+    log.info("speaker: each line plays in its own process (%s)",
+             "the robot's sound card" if robot and settings.audio_out.strip().lower()
+             in ("", "auto") else "ARGOS_AUDIO_OUT" if settings.audio_out.strip()
+             else "the default device")
     return Voice(clock, settings.cache_dir / "voice", tts, speaker,
                  cache_key=f"{settings.elevenlabs_voice_id}|{settings.elevenlabs_model}")
 
