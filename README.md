@@ -28,6 +28,15 @@ never an image. Both sign in with a password and an authenticator code.
 Nothing has to be worn and nothing is recorded continuously. A check that ends well leaves
 no picture and no description, and the database refuses to store one.
 
+## The dashboard
+
+![The family dashboard in alert: the camera saw someone on the floor and nobody answered](docs/img/dashboard-alert.png)
+
+The family view during an unanswered check on the real robot. The camera saw someone on the
+floor, Argos asked, and nobody answered. The picture taken at that moment is drawn as an
+engraving, with the plain original one click away, and the summary under it was written from
+the frame. This run was a dry run, so the timeline says what would have been sent.
+
 ## What ran on the real robot
 
 Everything below was seen working on the hardware during the event, not only in tests.
@@ -59,7 +68,6 @@ What did not work, said plainly:
 | `contract/` | One document that fixes every name, state and record. It was written before any code, so the three programs were built side by side against it. |
 | `design/` | Visual identity, logo and the web build plan. |
 | `docs/` | Architecture and the build tracker, including the log of the first night on the hardware. |
-| `progress.md` | The idea, the decisions and the checklist. |
 
 Each part runs alone. The dashboard runs with no backend, and the brain runs with no robot,
 no camera and no network.
